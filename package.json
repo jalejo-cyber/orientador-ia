@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "pdf-parse": "^1.1.1",
-    "formidable": "^3.5.0"
+    "formidable": "^3.5.0",
+    "openai": "^4.0.0"
   }
 }
