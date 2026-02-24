@@ -25,20 +25,16 @@ export default async function handler(req, res) {
         ? "Eres un orientador profesional amable que ayuda paso a paso."
         : "Ets un orientador professional amable que ajuda pas a pas.";
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        input: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
-        ]
-      })
-    });
+  const res = await fetch("/api/chat", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    message: message,
+    lang: document.getElementById("langSelect").value || "ca"
+  })
+});
 
     const data = await response.json();
 
