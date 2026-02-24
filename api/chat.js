@@ -75,7 +75,12 @@ export default async function handler(req, res){
     });
 
     const data = await r.json();
-    if(!r.ok) return res.status(500).json({ error: data?.error?.message || "Error OpenAI" });
+   if (!response.ok) {
+  console.log("OPENAI ERROR:", data);
+  return res.status(500).json({
+    error: data.error?.message || JSON.stringify(data)
+  });
+}
 
     const reply = data.output_text || (lang==="ca" ? "No he pogut generar resposta." : "No he podido generar respuesta.");
 
