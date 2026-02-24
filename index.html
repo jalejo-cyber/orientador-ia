@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orientador amb IA</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div>
+        <h1>Orientador amb IA (no vinculant)</h1>
+        <p class="sub">Aquesta eina dona orientació preliminar. La validació final correspon al procediment oficial.</p>
+      </div>
+
+      <div class="lang">
+        <label>Idioma</label>
+        <select id="langSelect">
+          <option value="ca" selected>Català</option>
+          <option value="es">Castellà</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="chatWrap">
+      <div id="chat" class="chat"></div>
+
+      <div class="tools">
+        <div class="upload">
+          <label class="btn">
+            Pujar PDFs (CV / vida laboral / cursos)
+            <input id="pdfInput" type="file" accept="application/pdf" multiple hidden />
+          </label>
+          <span id="pdfStatus" class="muted">Cap document pujat</span>
+        </div>
+
+        <button id="analyzeBtn" class="btn primary">Analitzar documents</button>
+      </div>
+
+      <div class="composer">
+        <input id="msgInput" type="text" placeholder="Escriu aquí…" />
+        <button id="sendBtn" class="btn primary">Enviar</button>
+      </div>
+
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <span id="loadingText">Estic treballant…</span>
+      </div>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
