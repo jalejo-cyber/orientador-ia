@@ -94,11 +94,11 @@ async function sendMessage(){
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({
-        lang: langSelect.value,
-        userMessage: text,
-        extractedText,
-        convo
-      })
+  lang: langSelect.value,
+  message: text,
+  extractedText,
+  convo
+})
     });
 
     const data = await res.json();
