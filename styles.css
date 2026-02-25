@@ -221,11 +221,8 @@ input:focus,select:focus,textarea:focus{
   box-shadow: 0 8px 20px rgba(17,24,39,.06);
 }
 
-.task input{
-  width:18px;
-  height:18px;
-  accent-color: var(--primary);
-  flex-shrink:0;
+.task input:checked{
+  transform: scale(1.1);
 }
 
 .task b{
