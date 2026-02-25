@@ -1,173 +1,264 @@
 <!DOCTYPE html>
 <html lang="ca">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Sistema digital d’orientació (Catalunya)</title>
-  <link rel="stylesheet" href="./styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema digital d’orientació</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#7A1E2C;
+  --bg:#F4F5F7;
+  --text:#2F2F2F;
+}
+
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.container{
+  max-width:900px;
+  margin:60px auto;
+  background:white;
+  padding:40px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.05);
+}
+
+h1{
+  margin-top:0;
+  font-weight:600;
+}
+
+.step{
+  margin-top:35px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  margin-top:15px;
+}
+
+.card{
+  border:1px solid #ddd;
+  padding:20px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+
+.card:hover{
+  border-color:var(--primary);
+}
+
+.card.selected{
+  border:2px solid var(--primary);
+}
+
+label{
+  display:block;
+  margin-top:15px;
+  font-weight:500;
+}
+
+input, select, textarea{
+  width:100%;
+  margin-top:8px;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+button{
+  margin-top:25px;
+  background:var(--primary);
+  color:white;
+  border:none;
+  padding:12px 20px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#5f1723;
+}
+
+.result{
+  margin-top:40px;
+  padding:30px;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 8px 25px rgba(0,0,0,0.06);
+  display:none;
+}
+
+.result h2{
+  color:var(--primary);
+}
+
+.fade{
+  animation:fadeIn .4s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <header class="top">
-      <div>
-        <h1>Sistema digital d’orientació</h1>
-        <p class="sub">
-          Prediagnòstic <strong>orientatiu i no vinculant</strong> per a l’acreditació de competències professionals (Catalunya).
-        </p>
-      </div>
-      <div class="badge">MVP · sense IA externa</div>
-    </header>
 
-    <section class="card">
-      <div class="note">
-        <strong>Avís:</strong> Aquest resultat és orientatiu i no substitueix el procediment oficial. Serveix per preparar millor la teva consulta al Punt d’Informació.
-      </div>
+<div class="container">
 
-      <!-- PROGRÉS -->
-      <div class="progress">
-        <div class="bar"><div id="barFill" class="fill"></div></div>
-        <div id="barText" class="barText">Pas 1 de 4</div>
-      </div>
+<h1>Sistema digital d’orientació</h1>
+<p>Eina orientativa no vinculant · Catalunya</p>
 
-      <!-- PAS 1 -->
-      <div id="step1" class="step active">
-        <h2>Pas 1 · Perfil</h2>
+<!-- PAS 1 -->
+<div class="step">
+<h2>1. Àmbit professional</h2>
 
-        <div class="grid">
-          <div class="field">
-            <label>Edat</label>
-            <input id="age" type="number" min="16" max="99" placeholder="Ex: 34" />
-          </div>
+<div class="cards">
+  <div class="card" data-value="Administració i gestió">Administració i gestió</div>
+  <div class="card" data-value="Electricitat i electrònica">Electricitat i electrònica</div>
+  <div class="card" data-value="Hostaleria i turisme">Hostaleria i turisme</div>
+  <div class="card" data-value="Informàtica i comunicacions">Informàtica i comunicacions</div>
+</div>
+</div>
 
-          <div class="field">
-            <label>Situació actual</label>
-            <select id="status">
-              <option value="">Selecciona</option>
-              <option value="atur">En situació d’atur</option>
-              <option value="treballant">Treballant</option>
-              <option value="estudiant">Estudiant</option>
-              <option value="altres">Altres</option>
-            </select>
-          </div>
+<!-- PAS 2 -->
+<div class="step">
+<h2>2. Experiència professional</h2>
 
-          <div class="field">
-            <label>Anys d’experiència total (aprox.)</label>
-            <input id="yearsTotal" type="number" min="0" max="60" placeholder="Ex: 6" />
-          </div>
+<label>Anys d'experiència aproximats</label>
+<input type="number" id="experience" min="0" max="40">
 
-          <div class="field">
-            <label>Família professional (inicial)</label>
-            <select id="family">
-              <option value="">Selecciona</option>
-              <option value="ADMINISTRACIO">Administració i gestió</option>
-              <option value="HOSTALERIA">Hostaleria i turisme</option>
-              <option value="SANITAT">Sanitat / Atenció sociosanitària</option>
-              <option value="COMERC">Comerç i màrqueting</option>
-            </select>
-          </div>
-        </div>
+<label>Funcions realitzades (breu descripció)</label>
+<textarea id="tasks"></textarea>
+</div>
 
-        <div class="actions">
-          <button id="toStep2" class="btn primary">Continuar</button>
-        </div>
-      </div>
+<!-- PAS 3 -->
+<div class="step">
+<h2>3. Formació</h2>
 
-      <!-- PAS 2 -->
-      <div id="step2" class="step">
-        <h2>Pas 2 · Tasques i funcions</h2>
-        <p class="muted">Marca les tasques que has fet (encara que sigui parcialment). Com més informació, millor orientació.</p>
+<label>Nivell formatiu</label>
+<select id="education">
+  <option value="">Selecciona</option>
+  <option>ESO / Graduat escolar</option>
+  <option>Batxillerat</option>
+  <option>FP Grau Mitjà</option>
+  <option>FP Grau Superior</option>
+  <option>Estudis universitaris</option>
+</select>
 
-        <div class="grid">
-          <div class="field">
-            <label>Anys aproximats en aquesta família</label>
-            <input id="yearsFamily" type="number" min="0" max="60" placeholder="Ex: 3" />
-          </div>
+<label>Hores aproximades de formació relacionada</label>
+<input type="number" id="trainingHours">
+</div>
 
-          <div class="field">
-            <label>Paraules clau (opcional)</label>
-            <input id="keywords" type="text" placeholder="Ex: recepció, factures, caixa, cures..." />
-          </div>
-        </div>
+<button onclick="calculate()">Obtenir orientació</button>
 
-        <div id="tasksBox" class="tasks"></div>
+<!-- RESULTAT -->
+<div id="result" class="result"></div>
 
-        <div class="actions">
-          <button id="back1" class="btn">Enrere</button>
-          <button id="toStep3" class="btn primary">Continuar</button>
-        </div>
-      </div>
+</div>
 
-      <!-- PAS 3 -->
-      <div id="step3" class="step">
-        <h2>Pas 3 · Formació</h2>
-        <p class="muted">Selecciona el que s’aproximi més al teu cas.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-        <div class="grid">
-          <div class="field">
-            <label>Formació reglada relacionada</label>
-            <select id="formalEdu">
-              <option value="">Selecciona</option>
-              <option value="cap">Cap</option>
-              <option value="eso">ESO / Graduat escolar</option>
-              <option value="fp1">FP / CFGM (aprox. nivell 2)</option>
-              <option value="fp2">CFGS / Universitat (aprox. nivell 3)</option>
-            </select>
-          </div>
+<script>
 
-          <div class="field">
-            <label>Cursos / certificats (hores totals aprox.)</label>
-            <select id="courseHours">
-              <option value="">Selecciona</option>
-              <option value="0">0 h</option>
-              <option value="1_49">1–49 h</option>
-              <option value="50_199">50–199 h</option>
-              <option value="200_499">200–499 h</option>
-              <option value="500_plus">500+ h</option>
-            </select>
-          </div>
+let selectedFamily = "";
 
-          <div class="field full">
-            <label>Observacions (opcional)</label>
-            <textarea id="notes" rows="4" placeholder="Ex: he treballat amb persones grans, he fet gestió de comandes, etc."></textarea>
-          </div>
-        </div>
+document.querySelectorAll(".card").forEach(card=>{
+  card.addEventListener("click", ()=>{
+    document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+    card.classList.add("selected");
+    selectedFamily = card.dataset.value;
+  });
+});
 
-        <div class="actions">
-          <button id="back2" class="btn">Enrere</button>
-          <button id="toStep4" class="btn primary">Veure resultat</button>
-        </div>
-      </div>
+function calculate(){
 
-      <!-- PAS 4 -->
-      <div id="step4" class="step">
-        <h2>Pas 4 · Resultat orientatiu</h2>
+  const exp = parseInt(document.getElementById("experience").value) || 0;
+  const tasks = document.getElementById("tasks").value;
+  const education = document.getElementById("education").value;
+  const training = parseInt(document.getElementById("trainingHours").value) || 0;
 
-        <div id="resultSummary" class="summary"></div>
-        <div id="resultList" class="results"></div>
+  if(!selectedFamily){
+    alert("Selecciona un àmbit professional.");
+    return;
+  }
 
-        <div class="next">
-          <h3>Passos recomanats</h3>
-          <ol>
-            <li>Reuneix documentació: CV, vida laboral, certificats i cursos.</li>
-            <li>Demana cita al Punt d’Informació per assessorament formal.</li>
-            <li>Si tens dubtes sobre tasques concretes, prepara exemples (3–6 funcions per lloc de feina).</li>
-          </ol>
-        </div>
+  let level = "Nivell 1";
 
-        <div class="actions">
-          <button id="back3" class="btn">Enrere</button>
-          <button id="restart" class="btn primary">Fer un altre prediagnòstic</button>
-        </div>
-      </div>
-    </section>
+  if(exp >= 3 && training >= 200) level = "Nivell 2";
+  if(exp >= 5 && training >= 400) level = "Nivell 3";
 
-    <footer class="foot">
-      <span>© Sistema digital d’orientació (MVP)</span>
-      <span class="muted">Catalunya · orientatiu i no vinculant</span>
-    </footer>
-  </div>
+  const resultDiv = document.getElementById("result");
+  resultDiv.classList.add("fade");
+  resultDiv.style.display = "block";
 
-  <script src="./data.js"></script>
-  <script src="./app.js"></script>
+  resultDiv.innerHTML = `
+    <h2>Resultat orientatiu</h2>
+    <p><strong>Àmbit:</strong> ${selectedFamily}</p>
+    <p><strong>Nivell recomanat:</strong> ${level}</p>
+    <p style="margin-top:15px;font-size:14px;color:#555;">
+      Aquest resultat és orientatiu i no substitueix la validació oficial del procediment d’acreditació.
+    </p>
+    <button onclick="downloadPDF('${level}','${selectedFamily}',${exp},'${education}',${training},'${tasks.replace(/'/g,"")}')">
+      Descarregar informe en PDF
+    </button>
+  `;
+
+  resultDiv.scrollIntoView({behavior:"smooth"});
+}
+
+function downloadPDF(level,family,exp,education,training,tasks){
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const today = new Date().toLocaleDateString("ca-ES");
+
+  doc.setFontSize(18);
+  doc.setFont("helvetica","bold");
+  doc.text("Informe orientatiu d'acreditació de competències",20,20);
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica","normal");
+  doc.text("Centre emissor: Foment Formació",20,35);
+  doc.text("Data: "+today,20,42);
+
+  doc.line(20,48,190,48);
+
+  doc.text("Àmbit professional: "+family,20,60);
+  doc.text("Anys d'experiència: "+exp,20,68);
+  doc.text("Nivell formatiu: "+education,20,76);
+  doc.text("Hores formació: "+training,20,84);
+
+  doc.text("Funcions descrites:",20,96);
+  doc.text(tasks,20,104,{maxWidth:170});
+
+  doc.setFont("helvetica","bold");
+  doc.text("Resultat orientatiu: "+level,20,130);
+
+  doc.setFont("helvetica","normal");
+  doc.text(
+    "Aquest informe és orientatiu i no substitueix la validació oficial del procediment d'acreditació.",
+    20,
+    145,
+    {maxWidth:170}
+  );
+
+  doc.save("Informe_orientatiu_Foment_Formacio.pdf");
+}
+
+</script>
+
 </body>
 </html>
