@@ -358,20 +358,27 @@ function renderResult(){
   if(pref >= 2) indicators.push("Formació complementària coherent");
   if(!indicators.length) indicators.push("Informació limitada: es recomana afegir tasques i descripció");
 
-  resultSummary.innerHTML = `
-    <div><strong>Àmbit:</strong> ${fam?.title || "-"}</div>
-    <div><strong>Anys en l’àmbit:</strong> ${y >= 15 ? "15+" : y}</div>
-    <div><strong>Nivell orientatiu recomanat:</strong>
-      <span style="color:var(--primary);font-weight:900">Nivell ${recLevel}</span>
-    </div>
-    ${accessNote ? `<div style="margin-top:8px; color:var(--muted); font-size:13px">
-  <strong>Accés:</strong> ${accessNote}
-</div>` : ""}
-    <div style="margin-top:8px"><strong>Indicadors detectats:</strong></div>
-    <ul style="margin:6px 0 0; padding-left:18px">
-      ${indicators.map(i => `<li>${i}</li>`).join("")}
-    </ul>
-  `;
+resultSummary.innerHTML = `
+  <div><strong>Àmbit:</strong> ${fam?.title || "-"}</div>
+  <div><strong>Anys en l’àmbit:</strong> ${y >= 15 ? "15+" : y}</div>
+
+  <div style="margin-top:8px">
+    <strong>Perfil competencial detectat:</strong>
+    <span style="color:var(--primary);font-weight:900">
+      Nivell ${recLevel}
+    </span>
+  </div>
+
+  <div style="margin-top:12px; padding:10px; background:#F9FAFB; border-radius:10px; border:1px solid var(--line)">
+    <strong>Requisits acadèmics d’accés:</strong>
+    <div style="margin-top:4px">${access.requirements}</div>
+  </div>
+
+  <div style="margin-top:10px; padding:10px; background:#F0FDF4; border-radius:10px; border:1px solid #BBF7D0">
+    <strong>Vies alternatives possibles:</strong>
+    <div style="margin-top:4px">${access.alternatives}</div>
+  </div>
+`;
 
   if(!results.length){
     resultList.innerHTML = `
@@ -448,22 +455,48 @@ function niceHoursLabel(v){
     default: return v || "-";
   }
 }
-function getAccessNote(level, edu){
+function getAccessInfo(level, edu){
+
+  const info = {
+    requirements: "",
+    alternatives: ""
+  };
+
   if(level === 1){
-    return "Per al nivell 1 no s’exigeixen requisits acadèmics, però calen habilitats bàsiques de comunicació per seguir la formació.";
+    info.requirements = 
+      "No s’exigeixen requisits acadèmics ni professionals. Cal disposar d’habilitats bàsiques de comunicació que permetin seguir la formació.";
+
+    info.alternatives = 
+      "L’entitat formativa pot realitzar una valoració inicial de competències bàsiques.";
   }
 
   if(level === 2){
-    if(edu === "eso" || edu === "fp1" || edu === "fp2") return "";
-    return "Per accedir a nivell 2 normalment cal ESO o via equivalent. Si no es pot acreditar, es pot accedir superant una prova de competències clau de nivell 2 (segons procediment).";
+    info.requirements =
+      "Cal Graduat en ESO o equivalent, certificat professional nivell 1 de la mateixa família o via equivalent d’accés.";
+
+    if(edu === "eso" || edu === "fp1" || edu === "fp2"){
+      info.alternatives = 
+        "Requisits acadèmics aparentment coherents amb el nivell 2.";
+    } else {
+      info.alternatives =
+        "Si no es pot acreditar el requisit acadèmic, es pot accedir superant una prova de competències clau de nivell 2, segons procediment vigent del SOC.";
+    }
   }
 
   if(level === 3){
-    if(edu === "fp2") return "";
-    return "Per accedir a nivell 3 normalment cal Batxillerat/Tècnic (o vies equivalents). Si no es pot acreditar, es pot accedir superant una prova de competències clau de nivell 3 (segons procediment).";
+    info.requirements =
+      "Cal Batxillerat, Tècnic/Tècnic Superior o equivalent, o certificat professional nivell 2 de la mateixa família.";
+
+    if(edu === "fp2"){
+      info.alternatives =
+        "Requisits acadèmics aparentment coherents amb el nivell 3.";
+    } else {
+      info.alternatives =
+        "Si no es pot acreditar el requisit acadèmic, es pot accedir superant una prova de competències clau de nivell 3, segons procediment vigent del SOC.";
+    }
   }
 
-  return "";
+  return info;
 }
 
 function downloadPdf(){
@@ -478,6 +511,7 @@ function downloadPdf(){
   const edu = niceEduLabel(lastSummaryData.formalEdu);
   const hrs = niceHoursLabel(lastSummaryData.courseHours);
   const recLevel = lastSummaryData.recLevel;
+  const access = getAccessInfo(recLevel, formalEdu.value);
 
   const famObj = getFamily();
   const taskLabels = (famObj?.tasks || [])
