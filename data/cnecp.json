@@ -1,8 +1,0 @@
-{
-  "updatedAt": "2026-02-24",
-  "ecps": [
-    { "familia": "ADMINISTRACIÓ I GESTIÓ", "codigo": "ECP0001", "nivel": 2, "titulo": "Gestió administrativa i atenció al client" },
-    { "familia": "HOSTALERIA I TURISME", "codigo": "ECP0002", "nivel": 2, "titulo": "Servei de sala i atenció al client en restauració" },
-    { "familia": "SERVEIS SOCIOCULTURALS", "codigo": "ECP0003", "nivel": 2, "titulo": "Atenció a persones en situació de dependència" }
-  ]
-}
