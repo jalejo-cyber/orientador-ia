@@ -356,7 +356,9 @@ function renderResult(){
   resultSummary.innerHTML = `
     <div><strong>Àmbit:</strong> ${fam?.title || "-"}</div>
     <div><strong>Anys en l’àmbit:</strong> ${y >= 15 ? "15+" : y}</div>
-    <div><strong>Nivell orientatiu recomanat:</strong> <span style="color:var(--primary);font-weight:900">Nivell ${recLevel}</span></div>
+    <div><strong>Nivell orientatiu recomanat:</strong>
+      <span style="color:var(--primary);font-weight:900">Nivell ${recLevel}</span>
+    </div>
     <div style="margin-top:8px"><strong>Indicadors detectats:</strong></div>
     <ul style="margin:6px 0 0; padding-left:18px">
       ${indicators.map(i => `<li>${i}</li>`).join("")}
@@ -380,49 +382,39 @@ function renderResult(){
         </div>
       </div>
     `;
-} else {
-  resultList.innerHTML = results.map(r => {
+  } else {
+    resultList.innerHTML = results.map(r => {
+      let label = "Coincidència inicial";
+      let color = "#9CA3AF"; // gris
 
-    let label = "Coincidència inicial";
-    let color = "#9CA3AF"; // gris institucional
+      if(r.score >= 60){
+        label = "Coincidència alta";
+        color = "#1F9D55"; // verd
+      } else if(r.score >= 35){
+        label = "Coincidència mitjana";
+        color = "#B45309"; // taronja
+      }
 
-    if(r.score >= 60){
-      label = "Coincidència alta";
-      color = "#1F9D55"; // verd
-    } else if(r.score >= 35){
-      label = "Coincidència mitjana";
-      color = "#B45309"; // taronja
-    }
+      return `
+        <div class="result-card">
+          <div class="result-top">
+            <div>
+              <div><strong>${r.code}</strong> · Nivell ${r.level}</div>
+              <div style="margin-top:4px">${r.name}</div>
+            </div>
 
-    return `
-      <div class="result-card">
-        <div class="result-top">
-          <div>
-            <div><strong>${r.code}</strong> · Nivell ${r.level}</div>
-            <div style="margin-top:4px">${r.name}</div>
+            <div class="tag" style="border-color:${color}; color:${color}; font-weight:700">
+              ${label}
+            </div>
           </div>
 
-          <div class="tag" style="border-color:${color}; color:${color}; font-weight:700">
-            ${label}
+          <div class="why">
+            <strong>Indicadors detectats:</strong>
+            <ul>${r.why.map(w => `<li>${w}</li>`).join("")}</ul>
           </div>
         </div>
-
-        <div class="why">
-          <strong>Indicadors detectats:</strong>
-          <ul>${r.why.map(w => `<li>${w}</li>`).join("")}</ul>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-         
-
-        <div class="why">
-          <strong>Per què surt:</strong>
-          <ul>${r.why.map(w => `<li>${w}</li>`).join("")}</ul>
-        </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
 
   resultSection.classList.remove("hidden");
