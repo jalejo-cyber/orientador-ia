@@ -388,8 +388,8 @@ function renderResult(){
             <div><strong>${r.code}</strong> · Nivell ${r.level}</div>
             <div style="margin-top:4px">${r.name}</div>
           </div>
-          <div class="tag"><span class="score">${r.score}</span> pts</div>
-        </div>
+         
+
         <div class="why">
           <strong>Per què surt:</strong>
           <ul>${r.why.map(w => `<li>${w}</li>`).join("")}</ul>
