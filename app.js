@@ -380,14 +380,41 @@ function renderResult(){
         </div>
       </div>
     `;
-  } else {
-    resultList.innerHTML = results.map(r => `
+} else {
+  resultList.innerHTML = results.map(r => {
+
+    let label = "Coincidència inicial";
+    let color = "#9CA3AF"; // gris institucional
+
+    if(r.score >= 60){
+      label = "Coincidència alta";
+      color = "#1F9D55"; // verd
+    } else if(r.score >= 35){
+      label = "Coincidència mitjana";
+      color = "#B45309"; // taronja
+    }
+
+    return `
       <div class="result-card">
         <div class="result-top">
           <div>
             <div><strong>${r.code}</strong> · Nivell ${r.level}</div>
             <div style="margin-top:4px">${r.name}</div>
           </div>
+
+          <div class="tag" style="border-color:${color}; color:${color}; font-weight:700">
+            ${label}
+          </div>
+        </div>
+
+        <div class="why">
+          <strong>Indicadors detectats:</strong>
+          <ul>${r.why.map(w => `<li>${w}</li>`).join("")}</ul>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
          
 
         <div class="why">
