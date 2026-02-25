@@ -242,6 +242,17 @@ input:focus,select:focus,textarea:focus{
   margin-top:2px;
   display:block;
 }
+.task input:checked{
+  transform: scale(1.05);
+}
+
+.task input:checked + div{
+  color: var(--primary);
+}
+.task:has(input:checked){
+  border: 1.5px solid var(--primary);
+  background: #faf4f6;
+}
 .hint{margin-top:8px; font-size:12px; color:var(--muted)}
 
 .actions{
