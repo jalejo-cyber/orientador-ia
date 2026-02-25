@@ -226,9 +226,13 @@ function eduPreferredLevel(){
   const hours = courseHours.value;
 
   let lvl = 1;
+
+  // ✅ Ajust oficial orientatiu
+  if (edu === "eso") lvl = 2;
   if (edu === "fp1") lvl = 2;
   if (edu === "fp2") lvl = 3;
 
+  // Hores de formació complementària (no reglada) → com a màxim ajuda a “2”
   if (hours === "200_499") lvl = Math.max(lvl, 2);
   if (hours === "500_plus") lvl = Math.max(lvl, 2);
 
@@ -329,6 +333,7 @@ function renderResult(){
   const pref = eduPreferredLevel();
   const results = scoreQualifications();
   const recLevel = recommendedLevelFromEvidence(results);
+  const accessNote = getAccessNote(recLevel, formalEdu.value);
 
   lastResults = results;
   lastSummaryData = {
@@ -359,6 +364,9 @@ function renderResult(){
     <div><strong>Nivell orientatiu recomanat:</strong>
       <span style="color:var(--primary);font-weight:900">Nivell ${recLevel}</span>
     </div>
+    ${accessNote ? `<div style="margin-top:8px; color:var(--muted); font-size:13px">
+  <strong>Accés:</strong> ${accessNote}
+</div>` : ""}
     <div style="margin-top:8px"><strong>Indicadors detectats:</strong></div>
     <ul style="margin:6px 0 0; padding-left:18px">
       ${indicators.map(i => `<li>${i}</li>`).join("")}
@@ -439,6 +447,23 @@ function niceHoursLabel(v){
     case "500_plus": return "500+ h";
     default: return v || "-";
   }
+}
+function getAccessNote(level, edu){
+  if(level === 1){
+    return "Per al nivell 1 no s’exigeixen requisits acadèmics, però calen habilitats bàsiques de comunicació per seguir la formació.";
+  }
+
+  if(level === 2){
+    if(edu === "eso" || edu === "fp1" || edu === "fp2") return "";
+    return "Per accedir a nivell 2 normalment cal ESO o via equivalent. Si no es pot acreditar, es pot accedir superant una prova de competències clau de nivell 2 (segons procediment).";
+  }
+
+  if(level === 3){
+    if(edu === "fp2") return "";
+    return "Per accedir a nivell 3 normalment cal Batxillerat/Tècnic (o vies equivalents). Si no es pot acreditar, es pot accedir superant una prova de competències clau de nivell 3 (segons procediment).";
+  }
+
+  return "";
 }
 
 function downloadPdf(){
