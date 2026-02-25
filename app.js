@@ -71,11 +71,31 @@ function renderTasks(){
 }
 
 function normalizeText(s){
-  return (s || "")
+  if(!s) return "";
+
+  let text = s
     .toString()
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "");
+
+  // aplicar sinònims
+  Object.keys(SYNONYMS).forEach(key => {
+    const val = SYNONYMS[key];
+    const regex = new RegExp(key, "g");
+    text = text.replace(regex, val);
+  });
+
+  // reducció d'arrels simple
+  text = text
+    .replace(/acions/g, "")
+    .replace(/acio/g, "")
+    .replace(/ment/g, "")
+    .replace(/ments/g, "")
+    .replace(/s\b/g, "");
+
+  return text;
+}
 }
 
 function parseNum(v){
