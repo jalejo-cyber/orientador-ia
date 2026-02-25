@@ -1,65 +1,118 @@
 const $ = (id) => document.getElementById(id);
 
-const steps = [$("step1"), $("step2"), $("step3"), $("step4")];
-const barFill = $("barFill");
-const barText = $("barText");
+const progressFill = $("progressFill");
+const progressText = $("progressText");
 
-const age = $("age");
-const status = $("status");
-const yearsTotal = $("yearsTotal");
-const family = $("family");
+const step1 = $("step1");
+const step2 = $("step2");
+const step3 = $("step3");
+
+const familyGrid = $("familyGrid");
+const tasksBox = $("tasksBox");
 
 const yearsFamily = $("yearsFamily");
-const keywords = $("keywords");
-const tasksBox = $("tasksBox");
+const yearsFamilyLabel = $("yearsFamilyLabel");
+const status = $("status");
+const freeText = $("freeText");
 
 const formalEdu = $("formalEdu");
 const courseHours = $("courseHours");
-const notes = $("notes");
 
+const resultSection = $("resultSection");
 const resultSummary = $("resultSummary");
 const resultList = $("resultList");
+const downloadPdfBtn = $("downloadPdfBtn");
+const restartBtn = $("restartBtn");
 
-const data = window.ORIENTACIO_DATA;
+const s1Next = $("s1Next");
+const s2Back = $("s2Back");
+const s2Next = $("s2Next");
+const s3Back = $("s3Back");
+const calcBtn = $("calcBtn");
 
+const DATA = window.ORIENTA;
+
+let selectedFamilyId = "";
 let selectedTasks = new Set();
+let lastResults = []; // for PDF
+let lastSummaryData = null;
 
-function showStep(n){
-  steps.forEach((s, i) => s.classList.toggle("active", i === n));
-  const pct = ((n+1)/steps.length) * 100;
-  barFill.style.width = `${pct}%`;
-  barText.textContent = `Pas ${n+1} de ${steps.length}`;
+// --------------------
+// Icones (inline SVG)
+// --------------------
+function iconSvg(name){
+  const common = `width="20" height="20" viewBox="0 0 24 24" fill="none"`;
+  const stroke = `stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
+  switch(name){
+    case "briefcase":
+      return `<svg ${common}><path ${stroke} d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/><rect ${stroke} x="3" y="7" width="18" height="14" rx="2"/><path ${stroke} d="M3 13h18"/></svg>`;
+    case "utensils":
+      return `<svg ${common}><path ${stroke} d="M4 3v7a2 2 0 0 0 2 2h0V3"/><path ${stroke} d="M8 3v7a2 2 0 0 1-2 2"/><path ${stroke} d="M14 3v7"/><path ${stroke} d="M14 10a2 2 0 0 0 4 0V3"/></svg>`;
+    case "heart":
+      return `<svg ${common}><path ${stroke} d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>`;
+    case "cart":
+      return `<svg ${common}><circle ${stroke} cx="9" cy="21" r="1"/><circle ${stroke} cx="20" cy="21" r="1"/><path ${stroke} d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>`;
+    default:
+      return `<svg ${common}><circle ${stroke} cx="12" cy="12" r="9"/></svg>`;
+  }
+}
+
+// --------------------
+// Wizard UI
+// --------------------
+function setStep(n){
+  step1.classList.toggle("step-active", n === 1);
+  step2.classList.toggle("step-active", n === 2);
+  step3.classList.toggle("step-active", n === 3);
+
+  const pct = n === 1 ? 33 : n === 2 ? 66 : 100;
+  progressFill.style.width = `${pct}%`;
+  progressText.textContent = `Pas ${n} de 3`;
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function familyObj(){
-  const f = family.value;
-  return f && data.families[f] ? data.families[f] : null;
+function getFamily(){
+  return DATA.families.find(f => f.id === selectedFamilyId) || null;
+}
+
+function renderFamilies(){
+  familyGrid.innerHTML = DATA.families.map(f => `
+    <div class="family-card ${selectedFamilyId===f.id ? "selected":""}" data-id="${f.id}">
+      <div class="family-icon">${iconSvg(f.icon)}</div>
+      <div>
+        <div class="family-title">${f.title}</div>
+        <div class="family-desc">${f.desc}</div>
+      </div>
+    </div>
+  `).join("");
+
+  familyGrid.querySelectorAll(".family-card").forEach(el => {
+    el.addEventListener("click", () => {
+      selectedFamilyId = el.getAttribute("data-id");
+      renderFamilies();
+      renderTasks();
+    });
+  });
 }
 
 function renderTasks(){
-  const f = familyObj();
+  const fam = getFamily();
   selectedTasks = new Set();
-
-  if(!f){
-    tasksBox.innerHTML = `<div class="muted">Selecciona una família al pas 1.</div>`;
+  if(!fam){
+    tasksBox.innerHTML = `<div class="muted">Selecciona un àmbit al pas 1.</div>`;
     return;
   }
 
-  const html = `
-    <div class="taskGrid">
-      ${f.tasks.map(t => `
-        <label class="task">
-          <input type="checkbox" data-task="${t.id}">
-          <div>
-            <b>${t.label}</b>
-            <span>${t.hint}</span>
-          </div>
-        </label>
-      `).join("")}
-    </div>
-  `;
-  tasksBox.innerHTML = html;
+  tasksBox.innerHTML = fam.tasks.map(t => `
+    <label class="task">
+      <input type="checkbox" data-task="${t.id}">
+      <div>
+        <b>${t.label}</b>
+        <span>${t.hint}</span>
+      </div>
+    </label>
+  `).join("");
 
   tasksBox.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     cb.addEventListener("change", () => {
@@ -70,47 +123,71 @@ function renderTasks(){
   });
 }
 
-function normalizeText(s){
-  if(!s) return "";
+yearsFamily.addEventListener("input", () => {
+  const v = Number(yearsFamily.value);
+  yearsFamilyLabel.textContent = v >= 15 ? "15+" : String(v);
+});
 
-  let text = s
-    .toString()
-    .toLowerCase()
+// --------------------
+// Motor “quasi IA” (sense cost)
+// --------------------
+
+// Sinònims / normalitzacions ràpides (Català/Castellà barrejats típics)
+const SYNONYMS = {
+  "gent gran": "geriatria",
+  "avis": "geriatria",
+  "persones grans": "geriatria",
+  "ancians": "geriatria",
+  "moviments": "mobilitzacions",
+  "mobilitzar": "mobilitzacions",
+  "grua": "grua",
+  "abvd": "abvd",
+  "netejar": "higiene",
+  "netej": "higiene",
+  "appcc": "appcc",
+  "caixa registradora": "tpv",
+  "tpv": "tpv",
+  "facturacio": "factures",
+  "comptabilitat": "factures",
+  "albaran": "albarans",
+  "albarans": "albarans",
+  "reposicio": "reposicio",
+  "repositor": "reposicio"
+};
+
+// Paraules “fortes” per sumar més punts
+const STRONG = new Set([
+  "abvd","grua","appcc","escandalls","tpv","geriatria","dependencia","tracabilitat"
+]);
+
+function normalizeText(input){
+  if(!input) return "";
+  let t = input.toString().toLowerCase()
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "");
 
   // aplicar sinònims
-  Object.keys(SYNONYMS).forEach(key => {
-    const val = SYNONYMS[key];
-    const regex = new RegExp(key, "g");
-    text = text.replace(regex, val);
-  });
+  for(const k of Object.keys(SYNONYMS)){
+    t = t.replaceAll(k, SYNONYMS[k]);
+  }
 
-  // reducció d'arrels simple
-  text = text
-    .replace(/acions/g, "")
-    .replace(/acio/g, "")
-    .replace(/ment/g, "")
-    .replace(/ments/g, "")
-    .replace(/s\b/g, "");
+  // simplificació d’arrels molt suau (evita dependències)
+  t = t
+    .replaceAll(/acions\b/g, "")
+    .replaceAll(/acio\b/g, "")
+    .replaceAll(/ments\b/g, "")
+    .replaceAll(/ment\b/g, "");
 
-  return text;
-}
+  // espais nets
+  t = t.replaceAll(/[^a-z0-9\s+]/g, " ").replaceAll(/\s+/g, " ").trim();
+  return t;
 }
 
-function parseNum(v){
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function eduBoostToTargetLevel(){
-  // No “decidim” el nivell, només fem una orientació suau
-  // Retorna un “nivell preferent” aproximat (1..3) segons formació i cursos
+function eduPreferredLevel(){
   const edu = formalEdu.value;
   const hours = courseHours.value;
 
   let lvl = 1;
-
   if (edu === "fp1") lvl = 2;
   if (edu === "fp2") lvl = 3;
 
@@ -119,289 +196,366 @@ function eduBoostToTargetLevel(){
 
   return lvl;
 }
-const SYNONYMS = {
-  "gent gran": "geriatria",
-  "avis": "geriatria",
-  "persones grans": "geriatria",
-  "moviments": "mobilitzacions",
-  "mobilitzar": "mobilitzacions",
-  "netejar": "higiene",
-  "caixa registradora": "tpv",
-  "cuidador": "dependència",
-  "cuidar": "dependència",
-  "auxiliar": "suport",
-  "facturacio": "factures",
-  "comptabilitat": "factures"
-};
 
-const STRONG_KEYWORDS = [
-  "abvd",
-  "grua",
-  "appcc",
-  "escandall",
-  "tpv",
-  "dependencia",
-  "geriatria"
-];
-function computeResults(){
-  const f = familyObj();
-  if(!f) return [];
+function scoreQualifications(){
+  const fam = getFamily();
+  if(!fam) return [];
 
-  const yFam = parseNum(yearsFamily.value);
-  const yTot = parseNum(yearsTotal.value);
+  const y = Number(yearsFamily.value || 0);
+  const text = normalizeText(freeText.value || "");
+  const pref = eduPreferredLevel();
 
-  const kw = normalizeText(keywords.value + " " + notes.value);
-  const taskArr = Array.from(selectedTasks);
-
-  const prefLevel = eduBoostToTargetLevel();
-
-  const results = f.qualifications.map(q => {
+  const results = fam.quals.map(q => {
     let score = 0;
     const why = [];
 
-    // 1) Tasques seleccionades
-    const hitsTasks = q.taskIds.filter(id => selectedTasks.has(id)).length;
-    if(hitsTasks > 0){
-      score += hitsTasks * 12;
-      why.push(`Coincidència de tasques: ${hitsTasks}`);
+    // Tasques
+    const hitTasks = q.taskIds.filter(id => selectedTasks.has(id)).length;
+    if(hitTasks){
+      score += hitTasks * 14;
+      why.push(`Coincidència de tasques: ${hitTasks}`);
     }
 
-    // 2) Paraules clau
- let kwHits = 0;
-let strongHits = 0;
-
-q.keywords.forEach(w => {
-  const normW = normalizeText(w);
-  if(kw.includes(normW)){
-    kwHits++;
-    if(STRONG_KEYWORDS.includes(normW)){
-      strongHits++;
+    // Keywords + fortes
+    let kwHits = 0;
+    let strongHits = 0;
+    for(const w of q.keywords){
+      const nw = normalizeText(w);
+      if(text.includes(nw)){
+        kwHits++;
+        if(STRONG.has(nw)) strongHits++;
+      }
     }
-  }
-});
+    if(kwHits){
+      score += kwHits * 7;
+      why.push(`Paraules clau detectades: ${kwHits}`);
+    }
+    if(strongHits){
+      score += strongHits * 10;
+      why.push(`Competències específiques: ${strongHits}`);
+    }
 
-if(kwHits > 0){
-  score += kwHits * 6;
-  why.push(`Paraules clau detectades: ${kwHits}`);
-}
+    // Experiència
+    if(y >= q.minYears){
+      score += 20;
+      why.push(`Experiència ≥ ${q.minYears} anys`);
+    } else if (y > 0) {
+      score += Math.max(0, Math.floor((y / q.minYears) * 12));
+      why.push(`Experiència parcial (${y} anys)`);
+    }
 
-if(strongHits > 0){
-  score += strongHits * 10;
-  why.push(`Competències específiques detectades: ${strongHits}`);
-}
-
-    // 3) Anys d’experiència
-    if(yFam >= q.minAnys){
-      score += 18;
-      why.push(`Experiència en la família ≥ ${q.minAnys} anys`);
-    } else if (yFam > 0) {
-      score += Math.max(0, Math.floor((yFam / q.minAnys) * 10));
-      why.push(`Experiència parcial (${yFam} anys)`);
-    } else if (yTot >= q.minAnys) {
+    // Preferència de nivell (orientatiu)
+    const diff = Math.abs(q.level - pref);
+    if(diff === 0){
       score += 8;
-      why.push(`Experiència total podria ser compatible`);
-    }
-
-    // 4) Preferència de nivell (orientatiu)
-    const levelDiff = Math.abs((q.nivell || 1) - prefLevel);
-    if(levelDiff === 0){
-      score += 8;
-      why.push(`Nivell coherent amb formació/cursos`);
-    } else if (levelDiff === 1){
+      why.push(`Nivell coherent amb formació`);
+    } else if (diff === 1){
       score += 3;
     }
 
-    // Penalitzacions suaus: si demana molt i no hi ha evidència
-    if(q.minAnys >= 2.5 && yFam < 1.0 && hitsTasks === 0 && kwHits === 0){
+    // Penalització suau si és nivell 3 sense evidència
+    if(q.level === 3 && y < 2 && hitTasks === 0 && kwHits === 0){
       score -= 12;
     }
 
-    return {
-      ...q,
-      score,
-      why
-    };
+    return { ...q, score, why };
   });
 
-  // Filtrar: només els que tenen una evidència mínima
-  const filtered = results
-    .filter(r => r.score >= 12)
+  // només resultats amb base
+  return results
+    .filter(r => r.score >= 14)
     .sort((a,b) => b.score - a.score)
     .slice(0, 6);
-
-  return filtered;
 }
 
-function buildSummary(results){
-  const f = familyObj();
-  const ageVal = parseNum(age.value);
-  const yTot = parseNum(yearsTotal.value);
-  const yFam = parseNum(yearsFamily.value);
+function recommendedLevelFromEvidence(results){
+  // nivell orientatiu general (no vinculant), basat en preferència + resultats
+  const pref = eduPreferredLevel();
+  if(!results.length) return Math.min(pref, 2); // si no hi ha res, no “pujem” molt
 
-  const missing = [];
-  if(!family.value) missing.push("família");
-  if(!status.value) missing.push("situació");
-  if(!yearsTotal.value) missing.push("anys d’experiència total");
-  if(!yearsFamily.value) missing.push("anys a la família");
-  if(selectedTasks.size === 0) missing.push("tasques");
+  const top = results[0];
+  // mitjana ponderada suau
+  const avg = results.reduce((acc, r) => acc + (r.level * Math.min(1, r.score/60)), 0) / results.length;
+  const blend = Math.round((avg + pref) / 2);
 
-  const base = `
-    <div><strong>Família:</strong> ${f?.name || "-"}</div>
-    <div><strong>Edat:</strong> ${ageVal || "-"}</div>
-    <div><strong>Situació:</strong> ${status.value || "-"}</div>
-    <div><strong>Experiència total:</strong> ${yTot || "-"} anys</div>
-    <div><strong>Experiència família:</strong> ${yFam || "-"} anys</div>
-    <div><strong>Tasques marcades:</strong> ${selectedTasks.size}</div>
-    <div><strong>Nivell orientatiu segons formació:</strong> ${eduBoostToTargetLevel()}</div>
+  // clamp 1..3
+  return Math.max(1, Math.min(3, blend || top.level || pref));
+}
+
+// --------------------
+// Render result + PDF
+// --------------------
+function renderResult(){
+  const fam = getFamily();
+  const y = Number(yearsFamily.value || 0);
+  const pref = eduPreferredLevel();
+  const results = scoreQualifications();
+  const recLevel = recommendedLevelFromEvidence(results);
+
+  lastResults = results;
+  lastSummaryData = {
+    family: fam?.title || "",
+    yearsFamily: y,
+    status: status.value || "",
+    tasks: Array.from(selectedTasks),
+    freeText: freeText.value || "",
+    formalEdu: formalEdu.value || "",
+    courseHours: courseHours.value || "",
+    prefLevel: pref,
+    recLevel
+  };
+
+  const taskLabels = (fam?.tasks || [])
+    .filter(t => selectedTasks.has(t.id))
+    .map(t => t.label);
+
+  const indicators = [];
+  if(y >= 2) indicators.push("Experiència rellevant detectada");
+  if(taskLabels.length >= 3) indicators.push("Tasques alineades amb competències clau");
+  if(pref >= 2) indicators.push("Formació complementària coherent");
+  if(!indicators.length) indicators.push("Informació limitada: es recomana afegir tasques i descripció");
+
+  resultSummary.innerHTML = `
+    <div><strong>Àmbit:</strong> ${fam?.title || "-"}</div>
+    <div><strong>Anys en l’àmbit:</strong> ${y >= 15 ? "15+" : y}</div>
+    <div><strong>Nivell orientatiu recomanat:</strong> <span style="color:var(--primary);font-weight:900">Nivell ${recLevel}</span></div>
+    <div style="margin-top:8px"><strong>Indicadors detectats:</strong></div>
+    <ul style="margin:6px 0 0; padding-left:18px">
+      ${indicators.map(i => `<li>${i}</li>`).join("")}
+    </ul>
   `;
 
-  const warn = missing.length
-    ? `<div style="margin-top:8px;color:var(--warn)"><strong>Per millorar el resultat:</strong> completa ${missing.join(", ")}.</div>`
-    : `<div style="margin-top:8px;color:var(--ok)"><strong>Dades suficients</strong> per una orientació inicial.</div>`;
-
-  const resNote = results.length
-    ? `<div style="margin-top:8px"><strong>Resultat:</strong> ${results.length} proposta(es) orientativa(es).</div>`
-    : `<div style="margin-top:8px"><strong>Resultat:</strong> no hem pogut detectar propostes clares amb la informació actual.</div>`;
-
-  return base + warn + resNote;
-}
-
-function renderResults(){
-  const results = computeResults();
-
-  resultSummary.innerHTML = buildSummary(results);
-
-  if(results.length === 0){
+  if(!results.length){
     resultList.innerHTML = `
-      <div class="result">
-        <div class="resultTop">
-          <div><strong>No hi ha coincidències suficients</strong></div>
+      <div class="result-card">
+        <div class="result-top">
+          <div><strong>No s’han detectat propostes clares</strong></div>
           <div class="tag">Orientatiu</div>
         </div>
         <div class="why">
           Prova a:
           <ul>
             <li>Marcar 3–6 tasques del pas 2</li>
-            <li>Afegir paraules clau (ex: “factures”, “cuina”, “ABVD”, “TPV”...)</li>
-            <li>Indicar anys aproximats en la família</li>
+            <li>Afegir una descripció breu amb paraules com “TPV”, “APPCC”, “ABVD”, “factures”…</li>
+            <li>Indicar anys aproximats en l’àmbit</li>
           </ul>
         </div>
       </div>
     `;
-    return;
+  } else {
+    resultList.innerHTML = results.map(r => `
+      <div class="result-card">
+        <div class="result-top">
+          <div>
+            <div><strong>${r.code}</strong> · Nivell ${r.level}</div>
+            <div style="margin-top:4px">${r.name}</div>
+          </div>
+          <div class="tag"><span class="score">${r.score}</span> pts</div>
+        </div>
+        <div class="why">
+          <strong>Per què surt:</strong>
+          <ul>${r.why.map(w => `<li>${w}</li>`).join("")}</ul>
+        </div>
+      </div>
+    `).join("");
   }
 
-  resultList.innerHTML = results.map(r => `
-    <div class="result">
-      <div class="resultTop">
-        <div>
-          <div><strong>${r.codi}</strong> · Nivell ${r.nivell}</div>
-          <div style="margin-top:4px">${r.nom}</div>
-        </div>
-        <div class="tag"><span class="score">${r.score}</span> pts</div>
-      </div>
-      <div class="why">
-        <strong>Per què surt:</strong>
-        <ul>
-          ${r.why.map(w => `<li>${w}</li>`).join("")}
-        </ul>
-        <div style="margin-top:8px">
-          <strong>Què et preguntaria un orientador:</strong>
-          <ul>
-            <li>Quines 3–6 funcions feies exactament en el lloc principal?</li>
-            <li>Quantes hores/anys aproximats tens en aquestes funcions?</li>
-            <li>Tens certificats o cursos amb hores relacionats?</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  `).join("");
+  resultSection.classList.remove("hidden");
+  resultSection.scrollIntoView({ behavior: "smooth" });
 }
 
-// VALIDACIONS SUAVES
-function validateStep1(){
-  if(!family.value){
-    alert("Selecciona una família professional per continuar.");
-    family.focus();
-    return false;
+function niceEduLabel(v){
+  switch(v){
+    case "cap": return "Cap";
+    case "eso": return "ESO / Graduat escolar";
+    case "fp1": return "FP / CFGM (nivell 2 aprox.)";
+    case "fp2": return "CFGS / Universitat (nivell 3 aprox.)";
+    default: return v || "-";
   }
-  if(!status.value){
-    alert("Selecciona la teva situació actual.");
-    status.focus();
-    return false;
+}
+function niceHoursLabel(v){
+  switch(v){
+    case "0": return "0 h";
+    case "1_49": return "1–49 h";
+    case "50_199": return "50–199 h";
+    case "200_499": return "200–499 h";
+    case "500_plus": return "500+ h";
+    default: return v || "-";
   }
-  if(parseNum(yearsTotal.value) === 0){
-    // allow 0 but warn
-    const ok = confirm("No has indicat anys d’experiència total. Vols continuar igualment?");
-    if(!ok) { yearsTotal.focus(); return false; }
+}
+
+function downloadPdf(){
+  if(!lastSummaryData) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:"mm", format:"a4" });
+  const today = new Date().toLocaleDateString("ca-ES");
+
+  const fam = lastSummaryData.family || "-";
+  const y = lastSummaryData.yearsFamily >= 15 ? "15+" : String(lastSummaryData.yearsFamily);
+  const edu = niceEduLabel(lastSummaryData.formalEdu);
+  const hrs = niceHoursLabel(lastSummaryData.courseHours);
+  const recLevel = lastSummaryData.recLevel;
+
+  const famObj = getFamily();
+  const taskLabels = (famObj?.tasks || [])
+    .filter(t => selectedTasks.has(t.id))
+    .map(t => `• ${t.label}`);
+
+  // Header
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(16);
+  doc.text("Informe orientatiu d’acreditació de competències", 15, 18);
+
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(11);
+  doc.text("Centre emissor: Foment Formació", 15, 26);
+  doc.text("Data: " + today, 15, 32);
+
+  doc.setDrawColor(230);
+  doc.line(15, 36, 195, 36);
+
+  // Data summary
+  let yPos = 46;
+  doc.setFont("helvetica","bold"); doc.text("Dades facilitades", 15, yPos);
+  yPos += 8;
+  doc.setFont("helvetica","normal");
+  doc.text(`Àmbit professional: ${fam}`, 15, yPos); yPos += 7;
+  doc.text(`Anys d’experiència en l’àmbit: ${y}`, 15, yPos); yPos += 7;
+  doc.text(`Formació reglada: ${edu}`, 15, yPos); yPos += 7;
+  doc.text(`Hores formació complementària: ${hrs}`, 15, yPos); yPos += 8;
+
+  doc.setFont("helvetica","bold");
+  doc.text("Tasques seleccionades", 15, yPos);
+  yPos += 7;
+  doc.setFont("helvetica","normal");
+
+  if(taskLabels.length){
+    const block = taskLabels.join("\n");
+    const lines = doc.splitTextToSize(block, 170);
+    doc.text(lines, 15, yPos);
+    yPos += lines.length * 5 + 4;
+  } else {
+    doc.text("— No s’han seleccionat tasques —", 15, yPos);
+    yPos += 10;
+  }
+
+  const extra = (lastSummaryData.freeText || "").trim();
+  doc.setFont("helvetica","bold");
+  doc.text("Descripció addicional", 15, yPos);
+  yPos += 7;
+  doc.setFont("helvetica","normal");
+  if(extra){
+    const lines = doc.splitTextToSize(extra, 170);
+    doc.text(lines, 15, yPos);
+    yPos += lines.length * 5 + 6;
+  } else {
+    doc.text("— Sense descripció addicional —", 15, yPos);
+    yPos += 10;
+  }
+
+  // Result
+  doc.setFont("helvetica","bold");
+  doc.text(`Resultat orientatiu: Nivell ${recLevel}`, 15, yPos);
+  yPos += 8;
+
+  doc.setFont("helvetica","bold");
+  doc.text("Propostes orientatives", 15, yPos);
+  yPos += 7;
+  doc.setFont("helvetica","normal");
+
+  if(!lastResults.length){
+    doc.text("No s’han detectat propostes clares amb la informació actual.", 15, yPos);
+    yPos += 8;
+  } else {
+    for(const r of lastResults){
+      const line = `${r.code} (Nivell ${r.level}) — ${r.name}`;
+      const lines = doc.splitTextToSize("• " + line, 170);
+      doc.text(lines, 15, yPos);
+      yPos += lines.length * 5 + 2;
+      if(yPos > 265){
+        doc.addPage();
+        yPos = 20;
+      }
+    }
+  }
+
+  yPos += 6;
+  doc.setFont("helvetica","normal");
+  const legal = "Avís: aquest informe és orientatiu i no substitueix la validació oficial del procediment d’acreditació.";
+  doc.text(doc.splitTextToSize(legal, 170), 15, yPos);
+
+  doc.save(`Informe_orientatiu_Foment_Formacio_${today.replaceAll("/","-")}.pdf`);
+}
+
+// --------------------
+// Validacions minimalistes (professionals)
+// --------------------
+function ensureStep1(){
+  if(!selectedFamilyId){
+    alert("Selecciona un àmbit professional per continuar.");
+    return false;
   }
   return true;
 }
 
-function validateStep2(){
-  if(parseNum(yearsFamily.value) === 0){
-    const ok = confirm("No has indicat anys en aquesta família. Vols continuar igualment?");
-    if(!ok) { yearsFamily.focus(); return false; }
-  }
-  if(selectedTasks.size === 0){
-    const ok = confirm("No has marcat cap tasca. Vols continuar igualment?");
-    if(!ok) return false;
+function ensureStep2(){
+  const y = Number(yearsFamily.value || 0);
+  if(y === 0 && selectedTasks.size === 0 && !freeText.value.trim()){
+    const ok = confirm("No has indicat experiència, ni tasques, ni descripció. Vols continuar igualment?");
+    return ok;
   }
   return true;
 }
 
-function validateStep3(){
+function ensureStep3(){
   if(!formalEdu.value || !courseHours.value){
-    const ok = confirm("No has completat tota la formació. Vols continuar igualment?");
-    if(!ok) return false;
+    const ok = confirm("No has completat tota la informació de formació. Vols continuar igualment?");
+    return ok;
   }
   return true;
 }
 
-// EVENTS
-$("toStep2").addEventListener("click", () => {
-  if(!validateStep1()) return;
-  renderTasks();
-  showStep(1);
+// --------------------
+// Events
+// --------------------
+s1Next.addEventListener("click", () => {
+  if(!ensureStep1()) return;
+  setStep(2);
 });
 
-$("back1").addEventListener("click", () => showStep(0));
+s2Back.addEventListener("click", () => setStep(1));
+s2Next.addEventListener("click", () => {
+  if(!ensureStep2()) return;
+  setStep(3);
+});
+s3Back.addEventListener("click", () => setStep(2));
 
-$("toStep3").addEventListener("click", () => {
-  if(!validateStep2()) return;
-  showStep(2);
+calcBtn.addEventListener("click", () => {
+  if(!ensureStep3()) return;
+  renderResult();
 });
 
-$("back2").addEventListener("click", () => showStep(1));
+downloadPdfBtn.addEventListener("click", downloadPdf);
 
-$("toStep4").addEventListener("click", () => {
-  if(!validateStep3()) return;
-  renderResults();
-  showStep(3);
-});
-
-$("back3").addEventListener("click", () => showStep(2));
-
-$("restart").addEventListener("click", () => {
-  // reset inputs
-  [age, yearsTotal, yearsFamily].forEach(i => i.value = "");
+restartBtn.addEventListener("click", () => {
+  selectedFamilyId = "";
+  selectedTasks = new Set();
+  yearsFamily.value = "0";
+  yearsFamilyLabel.textContent = "0";
   status.value = "";
-  family.value = "";
-  keywords.value = "";
+  freeText.value = "";
   formalEdu.value = "";
   courseHours.value = "";
-  notes.value = "";
-  selectedTasks = new Set();
-  tasksBox.innerHTML = "";
-  resultSummary.innerHTML = "";
-  resultList.innerHTML = "";
-  showStep(0);
-});
-
-// When family changes on step1, refresh tasks if user had moved
-family.addEventListener("change", () => {
-  if($("step2").classList.contains("active")) renderTasks();
+  lastResults = [];
+  lastSummaryData = null;
+  resultSection.classList.add("hidden");
+  renderFamilies();
+  renderTasks();
+  setStep(1);
 });
 
 // init
-showStep(0);
+renderFamilies();
+renderTasks();
+setStep(1);
