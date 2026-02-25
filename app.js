@@ -167,11 +167,28 @@ function computeResults(){
     }
 
     // 2) Paraules clau
-    const kwHits = q.keywords.filter(w => kw.includes(normalizeText(w))).length;
-    if(kwHits > 0){
-      score += kwHits * 6;
-      why.push(`Paraules clau detectades: ${kwHits}`);
+ let kwHits = 0;
+let strongHits = 0;
+
+q.keywords.forEach(w => {
+  const normW = normalizeText(w);
+  if(kw.includes(normW)){
+    kwHits++;
+    if(STRONG_KEYWORDS.includes(normW)){
+      strongHits++;
     }
+  }
+});
+
+if(kwHits > 0){
+  score += kwHits * 6;
+  why.push(`Paraules clau detectades: ${kwHits}`);
+}
+
+if(strongHits > 0){
+  score += strongHits * 10;
+  why.push(`Competències específiques detectades: ${strongHits}`);
+}
 
     // 3) Anys d’experiència
     if(yFam >= q.minAnys){
