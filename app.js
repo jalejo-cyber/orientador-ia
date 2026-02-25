@@ -113,6 +113,16 @@ const SYNONYMS = {
   "facturacio": "factures",
   "comptabilitat": "factures"
 };
+
+const STRONG_KEYWORDS = [
+  "abvd",
+  "grua",
+  "appcc",
+  "escandall",
+  "tpv",
+  "dependencia",
+  "geriatria"
+];
 function computeResults(){
   const f = familyObj();
   if(!f) return [];
