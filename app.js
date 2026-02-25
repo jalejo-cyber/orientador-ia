@@ -46,8 +46,16 @@ function iconSvg(name){
   switch(name){
     case "briefcase":
       return `<svg ${common}><path ${stroke} d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/><rect ${stroke} x="3" y="7" width="18" height="14" rx="2"/><path ${stroke} d="M3 13h18"/></svg>`;
-    case "utensils":
-      return `<svg ${common}><path ${stroke} d="M4 3v7a2 2 0 0 0 2 2h0V3"/><path ${stroke} d="M8 3v7a2 2 0 0 1-2 2"/><path ${stroke} d="M14 3v7"/><path ${stroke} d="M14 10a2 2 0 0 0 4 0V3"/></svg>`;
+   case "utensils":
+  return `
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 2v7a2 2 0 0 0 2 2h0V2"/>
+    <path d="M7 2v7a2 2 0 0 1-2 2"/>
+    <path d="M14 3h7"/>
+    <path d="M17.5 3v18"/>
+  </svg>`;
     case "heart":
       return `<svg ${common}><path ${stroke} d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>`;
     case "cart":
