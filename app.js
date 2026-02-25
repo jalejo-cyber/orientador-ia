@@ -333,7 +333,7 @@ function renderResult(){
   const pref = eduPreferredLevel();
   const results = scoreQualifications();
   const recLevel = recommendedLevelFromEvidence(results);
-  const accessNote = getAccessNote(recLevel, formalEdu.value);
+ const access = getAccessInfo(recLevel, formalEdu.value);
 
   lastResults = results;
   lastSummaryData = {
