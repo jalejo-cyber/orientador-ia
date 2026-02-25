@@ -41,30 +41,60 @@ let lastSummaryData = null;
 // Icones (inline SVG)
 // --------------------
 function iconSvg(name){
-  const common = `width="20" height="20" viewBox="0 0 24 24" fill="none"`;
-  const stroke = `stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
+  const base = `
+  <rect x="2" y="2" width="20" height="20" rx="6"
+        fill="currentColor"/>`;
+
   switch(name){
-    case "briefcase":
-      return `<svg ${common}><path ${stroke} d="M8 7V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/><rect ${stroke} x="3" y="7" width="18" height="14" rx="2"/><path ${stroke} d="M3 13h18"/></svg>`;
-   case "utensils":
-  return `
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" stroke-width="2"
-       stroke-linecap="round" stroke-linejoin="round">
-    <path d="M3 2v7a2 2 0 0 0 2 2h0V2"/>
-    <path d="M7 2v7a2 2 0 0 1-2 2"/>
-    <path d="M14 3h7"/>
-    <path d="M17.5 3v18"/>
-  </svg>`;
-    case "heart":
-      return `<svg ${common}><path ${stroke} d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>`;
-    case "cart":
-      return `<svg ${common}><circle ${stroke} cx="9" cy="21" r="1"/><circle ${stroke} cx="20" cy="21" r="1"/><path ${stroke} d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>`;
+
+    case "briefcase": // Administració
+      return `
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        ${base}
+        <path d="M8 10h8M9 8V7a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"
+              stroke="#fff" stroke-width="1.8"
+              stroke-linecap="round"/>
+      </svg>`;
+
+    case "utensils": // Hostaleria → H hotel
+      return `
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        ${base}
+        <text x="12" y="16"
+              text-anchor="middle"
+              font-size="12"
+              font-weight="700"
+              fill="#fff"
+              font-family="Inter, sans-serif">
+          H
+        </text>
+      </svg>`;
+
+    case "heart": // Sanitat
+      return `
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        ${base}
+        <path d="M12 17s-4-3.5-4-6a2.5 2.5 0 0 1 4-1.7A2.5 2.5 0 0 1 16 11c0 2.5-4 6-4 6z"
+              fill="#fff"/>
+      </svg>`;
+
+    case "cart": // Comerç
+      return `
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        ${base}
+        <circle cx="9" cy="17" r="1.5" fill="#fff"/>
+        <circle cx="16" cy="17" r="1.5" fill="#fff"/>
+        <path d="M6 7h12l-1 6H8L6 7z"
+              fill="#fff"/>
+      </svg>`;
+
     default:
-      return `<svg ${common}><circle ${stroke} cx="12" cy="12" r="9"/></svg>`;
+      return `
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        ${base}
+      </svg>`;
   }
 }
-
 // --------------------
 // Wizard UI
 // --------------------
