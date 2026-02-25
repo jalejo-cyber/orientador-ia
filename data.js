@@ -1,165 +1,95 @@
-// data.js — MVP de qualificacions (exemples). Escalable afegint més objectes.
-
-window.ORIENTACIO_DATA = {
-  families: {
-    ADMINISTRACIO: {
-      name: "Administració i gestió",
+window.ORIENTA = {
+  families: [
+    {
+      id: "ADMIN",
+      title: "Administració i gestió",
+      desc: "Feines d’oficina, atenció al client, gestió documental, suport administratiu.",
+      icon: "briefcase",
       tasks: [
-        { id: "factures", label: "Facturació i comptabilitat bàsica", hint: "Factures, albarans, caixa, cobraments/pagaments" },
-        { id: "arxiu", label: "Arxiu i gestió documental", hint: "Organització, registre, digitalització" },
-        { id: "atencio", label: "Atenció al client", hint: "Telefonia, correu, recepció, incidències" },
-        { id: "ofimatica", label: "Ofimàtica", hint: "Word/Excel, bases de dades, CRM" },
-        { id: "comandes", label: "Gestió de comandes", hint: "Entrades, seguiment, coordinació amb proveïdors" },
-        { id: "rrhh", label: "Suport RRHH", hint: "Documentació, altes/baixes, control horari" }
+        { id:"factures", label:"Facturació i suport comptable", hint:"Factures, albarans, caixa, cobraments/pagaments" },
+        { id:"arxiu", label:"Arxiu i gestió documental", hint:"Registre, organització, digitalització" },
+        { id:"atencio", label:"Atenció al client", hint:"Recepció, telefonia, correu, incidències" },
+        { id:"ofimatica", label:"Ofimàtica / Excel", hint:"Fulls de càlcul, bases de dades, CRM" },
+        { id:"comandes", label:"Gestió de comandes", hint:"Seguiment, proveïdors, coordinació" },
+        { id:"rrhh", label:"Suport RRHH", hint:"Altes/baixes, documentació, control horari" }
       ],
-      qualifications: [
-        {
-          codi: "ADGG0408",
-          nom: "Operacions auxiliars de serveis administratius i generals",
-          nivell: 1,
-          minAnys: 0.5,
-          keywords: ["arxiu","documentació","oficina","correu","registre","fotocòpies","recepció"],
-          taskIds: ["arxiu","atencio","ofimatica"]
-        },
-        {
-          codi: "ADGG0208",
-          nom: "Activitats administratives en la relació amb el client",
-          nivell: 2,
-          minAnys: 1.5,
-          keywords: ["atenció","client","comandes","factures","incidències","crm","recepció"],
-          taskIds: ["atencio","comandes","ofimatica","factures"]
-        },
-        {
-          codi: "ADGD0308",
-          nom: "Activitats de gestió administrativa",
-          nivell: 3,
-          minAnys: 2.5,
-          keywords: ["gestió","procediments","comptabilitat","rrhh","organització","pressupostos"],
-          taskIds: ["factures","rrhh","ofimatica","arxiu"]
-        }
+      quals: [
+        { code:"ADGG0408", name:"Operacions auxiliars de serveis administratius i generals", level:1, minYears:0.5,
+          keywords:["arxiu","documentacio","recepcio","registre","oficina"], taskIds:["arxiu","atencio","ofimatica"] },
+        { code:"ADGG0208", name:"Activitats administratives en la relació amb el client", level:2, minYears:1.5,
+          keywords:["atencio","client","comandes","factures","crm","incidencies"], taskIds:["atencio","comandes","ofimatica","factures"] },
+        { code:"ADGD0308", name:"Activitats de gestió administrativa", level:3, minYears:2.5,
+          keywords:["gestio","procediments","rrhh","organitzacio","pressupostos"], taskIds:["factures","rrhh","arxiu","ofimatica"] }
       ]
     },
 
-    HOSTALERIA: {
-      name: "Hostaleria i turisme",
+    {
+      id: "HOST",
+      title: "Hostaleria i turisme",
+      desc: "Servei de sala, barra, cuina, reserves i higiene alimentària (APPCC).",
+      icon: "utensils",
       tasks: [
-        { id: "sala", label: "Servei de sala", hint: "Comandes, servei taula, protocol, al·lèrgens" },
-        { id: "barra", label: "Barra i begudes", hint: "Cafeteria, còctels bàsics, tiratge" },
-        { id: "cuina", label: "Cuina", hint: "Mise en place, elaboracions, conservació" },
-        { id: "higiene", label: "Higiene i APPCC", hint: "Neteja, temperatures, traçabilitat" },
-        { id: "recepcio", label: "Recepció / reserves", hint: "Check-in, reserves, PMS, atenció client" },
-        { id: "pissarra", label: "Gestió de comandes i estoc", hint: "Proveïdors, inventari, càmeres" }
+        { id:"sala", label:"Servei de sala", hint:"Comandes, servei, protocol, al·lèrgens" },
+        { id:"barra", label:"Barra i begudes", hint:"Cafeteria, combinats bàsics, tiratge" },
+        { id:"cuina", label:"Cuina", hint:"Mise en place, elaboracions, conservació" },
+        { id:"higiene", label:"Higiene i APPCC", hint:"Neteja, temperatures, traçabilitat" },
+        { id:"recepcio", label:"Recepció / reserves", hint:"Check-in, reserves, atenció client" },
+        { id:"estoc", label:"Comandes i estoc", hint:"Inventari, proveïdors, càmeres" }
       ],
-      qualifications: [
-        {
-          codi: "HOTR0208",
-          nom: "Operacions bàsiques de restaurant i bar",
-          nivell: 1,
-          minAnys: 0.5,
-          keywords: ["sala","barra","cafeteria","servei","taula","neteja","al·lèrgens"],
-          taskIds: ["sala","barra","higiene"]
-        },
-        {
-          codi: "HOTR0308",
-          nom: "Serveis de restaurant",
-          nivell: 2,
-          minAnys: 1.5,
-          keywords: ["servei","protocol","comandes","vins","al·lèrgens","atenció"],
-          taskIds: ["sala","higiene","barra"]
-        },
-        {
-          codi: "HOTR0408",
-          nom: "Cuina",
-          nivell: 2,
-          minAnys: 1.5,
-          keywords: ["cuina","elaboracions","miseenplace","appcc","traçabilitat","conservació"],
-          taskIds: ["cuina","higiene","pissarra"]
-        },
-        {
-          codi: "HOTA0108",
-          nom: "Direcció i producció en cuina",
-          nivell: 3,
-          minAnys: 2.5,
-          keywords: ["organització","escandalls","costos","planificació","equips","producció"],
-          taskIds: ["cuina","pissarra","higiene"]
-        }
+      quals: [
+        { code:"HOTR0208", name:"Operacions bàsiques de restaurant i bar", level:1, minYears:0.5,
+          keywords:["sala","barra","servei","neteja","alergens"], taskIds:["sala","barra","higiene"] },
+        { code:"HOTR0408", name:"Cuina", level:2, minYears:1.5,
+          keywords:["cuina","miseenplace","appcc","tracabilitat","conservacio"], taskIds:["cuina","higiene","estoc"] },
+        { code:"HOTA0108", name:"Direcció i producció en cuina", level:3, minYears:2.5,
+          keywords:["organitzacio","escandalls","costos","planificacio","equips"], taskIds:["cuina","estoc","higiene"] }
       ]
     },
 
-    SANITAT: {
-      name: "Sanitat / Atenció sociosanitària",
+    {
+      id: "SANI",
+      title: "Sanitat / Atenció sociosanitària",
+      desc: "Cures bàsiques, ABVD, mobilitzacions, suport domiciliari i institucional.",
+      icon: "heart",
       tasks: [
-        { id: "higiene_personal", label: "Higiene personal i suport ABVD", hint: "Bany, vestir, alimentació, mobilització" },
-        { id: "mobilitzacions", label: "Mobilitzacions i transferències", hint: "Grues, canvis posturals, prevenció caigudes" },
-        { id: "suport_domestic", label: "Suport a la llar", hint: "Àpats, neteja, medicació (recordatori), compres" },
-        { id: "acompanyament", label: "Acompanyament i suport psicosocial", hint: "Rutines, estimulació, comunicació" },
-        { id: "registres", label: "Registres i comunicació amb equip", hint: "Incidències, parts, coordinació" },
-        { id: "primeres_cures", label: "Cures bàsiques", hint: "Úlceres, constants bàsiques (segons rol), higiene" }
+        { id:"abvd", label:"Higiene i suport ABVD", hint:"Bany, vestir, alimentació, mobilització" },
+        { id:"mobilitzacions", label:"Mobilitzacions i transferències", hint:"Canvis posturals, grua, prevenció caigudes" },
+        { id:"domicili", label:"Suport a la llar", hint:"Àpats, neteja, compres, recordatori medicació" },
+        { id:"psicosocial", label:"Acompanyament i suport psicosocial", hint:"Rutines, estimulació, comunicació" },
+        { id:"registres", label:"Registres i coordinació", hint:"Incidències, parts, equip" },
+        { id:"cures", label:"Cures bàsiques", hint:"Higiene, prevenció, cures simples segons rol" }
       ],
-      qualifications: [
-        {
-          codi: "SSCS0208",
-          nom: "Atenció sociosanitària a persones dependents en institucions socials",
-          nivell: 2,
-          minAnys: 1.5,
-          keywords: ["dependència","institució","abvd","mobilització","grua","higiene","geriatria"],
-          taskIds: ["higiene_personal","mobilitzacions","acompanyament","registres"]
-        },
-        {
-          codi: "SSCS0108",
-          nom: "Atenció sociosanitària a persones en el domicili",
-          nivell: 2,
-          minAnys: 1.0,
-          keywords: ["domicili","cures","llar","abvd","àpats","netej","acompanyament"],
-          taskIds: ["suport_domestic","higiene_personal","acompanyament","registres"]
-        },
-        {
-          codi: "SANT0108",
-          nom: "Atenció sanitària a múltiples víctimes i catàstrofes (orientatiu)",
-          nivell: 3,
-          minAnys: 2.5,
-          keywords: ["emergències","coordinació","protocols","assistència","triage"],
-          taskIds: ["registres","primeres_cures"]
-        }
+      quals: [
+        { code:"SSCS0108", name:"Atenció sociosanitària a persones en el domicili", level:2, minYears:1.0,
+          keywords:["domicili","abvd","cures","llar","acompanyament"], taskIds:["domicili","abvd","psicosocial","registres"] },
+        { code:"SSCS0208", name:"Atenció sociosanitària en institucions socials", level:2, minYears:1.5,
+          keywords:["dependencia","institucio","abvd","grua","geriatria","mobilitzacions"], taskIds:["abvd","mobilitzacions","psicosocial","registres"] },
+        { code:"SSCG0111", name:"Gestió de crides i suport en serveis socials (orientatiu)", level:3, minYears:2.5,
+          keywords:["coordinacio","plans","seguiment","organitzacio","equip"], taskIds:["registres","psicosocial"] }
       ]
     },
 
-    COMERC: {
-      name: "Comerç i màrqueting",
+    {
+      id: "COMER",
+      title: "Comerç i màrqueting",
+      desc: "Venda, caixa/TPV, reposició, magatzem i atenció al client.",
+      icon: "cart",
       tasks: [
-        { id: "caixa", label: "Caixa i cobrament", hint: "TPV, devolucions, tancament caixa" },
-        { id: "venda", label: "Venda i assessorament", hint: "Atenció, upselling, incidències" },
-        { id: "repositor", label: "Reposició i lineal", hint: "Merxandatge, etiquetatge, planogrames" },
-        { id: "magatzem", label: "Magatzem", hint: "Recepció mercaderia, inventari, picking" },
-        { id: "comandes", label: "Comandes i proveïdors", hint: "Entrades, albarans, incidències" },
-        { id: "online", label: "Venda online (bàsic)", hint: "Comandes web, devolucions, atenció digital" }
+        { id:"tpv", label:"Caixa i TPV", hint:"Cobrament, devolucions, tancament" },
+        { id:"venda", label:"Venda i assessorament", hint:"Atenció, reclamacions, objectius" },
+        { id:"reposicio", label:"Reposició i lineal", hint:"Merchandising, etiquetatge, planogrames" },
+        { id:"magatzem", label:"Magatzem", hint:"Recepció, inventari, picking" },
+        { id:"comandes", label:"Comandes i proveïdors", hint:"Albarans, incidències, seguiment" },
+        { id:"online", label:"Venda online (bàsic)", hint:"Comandes web, devolucions, atenció digital" }
       ],
-      qualifications: [
-        {
-          codi: "COMT0211",
-          nom: "Activitats auxiliars de comerç",
-          nivell: 1,
-          minAnys: 0.5,
-          keywords: ["reposició","lineal","magatzem","caixa","etiquetatge","atenció"],
-          taskIds: ["repositor","magatzem","caixa","venda"]
-        },
-        {
-          codi: "COMV0108",
-          nom: "Activitats de venda",
-          nivell: 2,
-          minAnys: 1.0,
-          keywords: ["venda","assessorament","client","tpv","devolucions","objectius"],
-          taskIds: ["venda","caixa"]
-        },
-        {
-          codi: "COMM0112",
-          nom: "Gestió de màrqueting i comunicació (orientatiu)",
-          nivell: 3,
-          minAnys: 2.5,
-          keywords: ["campanyes","comunicació","estratègia","rrss","analítica"],
-          taskIds: ["online"]
-        }
+      quals: [
+        { code:"COMT0211", name:"Activitats auxiliars de comerç", level:1, minYears:0.5,
+          keywords:["reposicio","magatzem","tpv","etiquetatge","atencio"], taskIds:["reposicio","magatzem","tpv","venda"] },
+        { code:"COMV0108", name:"Activitats de venda", level:2, minYears:1.0,
+          keywords:["venda","assessorament","client","devolucions","objectius"], taskIds:["venda","tpv"] },
+        { code:"COMM0112", name:"Gestió de màrqueting i comunicació (orientatiu)", level:3, minYears:2.5,
+          keywords:["campanyes","comunicacio","estrategia","rrss","analitica"], taskIds:["online"] }
       ]
     }
-  }
+  ]
 };
