@@ -2,54 +2,172 @@
 <html lang="ca">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orientador amb IA</title>
-  <link rel="stylesheet" href="/styles.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Sistema digital d’orientació (Catalunya)</title>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <div class="page">
-    <header class="topbar">
+  <div class="wrap">
+    <header class="top">
       <div>
-        <h1>Orientador amb IA (no vinculant)</h1>
-        <p class="sub">Aquesta eina dona orientació preliminar. La validació final correspon al procediment oficial.</p>
+        <h1>Sistema digital d’orientació</h1>
+        <p class="sub">
+          Prediagnòstic <strong>orientatiu i no vinculant</strong> per a l’acreditació de competències professionals (Catalunya).
+        </p>
       </div>
-
-      <div class="lang">
-        <label>Idioma</label>
-        <select id="langSelect">
-          <option value="ca" selected>Català</option>
-          <option value="es">Castellà</option>
-        </select>
-      </div>
+      <div class="badge">MVP · sense IA externa</div>
     </header>
 
-    <main class="chatWrap">
-      <div id="chat" class="chat"></div>
+    <section class="card">
+      <div class="note">
+        <strong>Avís:</strong> Aquest resultat és orientatiu i no substitueix el procediment oficial. Serveix per preparar millor la teva consulta al Punt d’Informació.
+      </div>
 
-      <div class="tools">
-        <div class="upload">
-          <label class="btn">
-            Pujar PDFs (CV / vida laboral / cursos)
-            <input id="pdfInput" type="file" accept="application/pdf" multiple hidden />
-          </label>
-          <span id="pdfStatus" class="muted">Cap document pujat</span>
+      <!-- PROGRÉS -->
+      <div class="progress">
+        <div class="bar"><div id="barFill" class="fill"></div></div>
+        <div id="barText" class="barText">Pas 1 de 4</div>
+      </div>
+
+      <!-- PAS 1 -->
+      <div id="step1" class="step active">
+        <h2>Pas 1 · Perfil</h2>
+
+        <div class="grid">
+          <div class="field">
+            <label>Edat</label>
+            <input id="age" type="number" min="16" max="99" placeholder="Ex: 34" />
+          </div>
+
+          <div class="field">
+            <label>Situació actual</label>
+            <select id="status">
+              <option value="">Selecciona</option>
+              <option value="atur">En situació d’atur</option>
+              <option value="treballant">Treballant</option>
+              <option value="estudiant">Estudiant</option>
+              <option value="altres">Altres</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Anys d’experiència total (aprox.)</label>
+            <input id="yearsTotal" type="number" min="0" max="60" placeholder="Ex: 6" />
+          </div>
+
+          <div class="field">
+            <label>Família professional (inicial)</label>
+            <select id="family">
+              <option value="">Selecciona</option>
+              <option value="ADMINISTRACIO">Administració i gestió</option>
+              <option value="HOSTALERIA">Hostaleria i turisme</option>
+              <option value="SANITAT">Sanitat / Atenció sociosanitària</option>
+              <option value="COMERC">Comerç i màrqueting</option>
+            </select>
+          </div>
         </div>
 
-        <button id="analyzeBtn" class="btn primary">Analitzar documents</button>
+        <div class="actions">
+          <button id="toStep2" class="btn primary">Continuar</button>
+        </div>
       </div>
 
-      <div class="composer">
-        <input id="msgInput" type="text" placeholder="Escriu aquí…" />
-        <button id="sendBtn" class="btn primary">Enviar</button>
+      <!-- PAS 2 -->
+      <div id="step2" class="step">
+        <h2>Pas 2 · Tasques i funcions</h2>
+        <p class="muted">Marca les tasques que has fet (encara que sigui parcialment). Com més informació, millor orientació.</p>
+
+        <div class="grid">
+          <div class="field">
+            <label>Anys aproximats en aquesta família</label>
+            <input id="yearsFamily" type="number" min="0" max="60" placeholder="Ex: 3" />
+          </div>
+
+          <div class="field">
+            <label>Paraules clau (opcional)</label>
+            <input id="keywords" type="text" placeholder="Ex: recepció, factures, caixa, cures..." />
+          </div>
+        </div>
+
+        <div id="tasksBox" class="tasks"></div>
+
+        <div class="actions">
+          <button id="back1" class="btn">Enrere</button>
+          <button id="toStep3" class="btn primary">Continuar</button>
+        </div>
       </div>
 
-      <div id="loading" class="loading hidden">
-        <div class="spinner"></div>
-        <span id="loadingText">Estic treballant…</span>
+      <!-- PAS 3 -->
+      <div id="step3" class="step">
+        <h2>Pas 3 · Formació</h2>
+        <p class="muted">Selecciona el que s’aproximi més al teu cas.</p>
+
+        <div class="grid">
+          <div class="field">
+            <label>Formació reglada relacionada</label>
+            <select id="formalEdu">
+              <option value="">Selecciona</option>
+              <option value="cap">Cap</option>
+              <option value="eso">ESO / Graduat escolar</option>
+              <option value="fp1">FP / CFGM (aprox. nivell 2)</option>
+              <option value="fp2">CFGS / Universitat (aprox. nivell 3)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Cursos / certificats (hores totals aprox.)</label>
+            <select id="courseHours">
+              <option value="">Selecciona</option>
+              <option value="0">0 h</option>
+              <option value="1_49">1–49 h</option>
+              <option value="50_199">50–199 h</option>
+              <option value="200_499">200–499 h</option>
+              <option value="500_plus">500+ h</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label>Observacions (opcional)</label>
+            <textarea id="notes" rows="4" placeholder="Ex: he treballat amb persones grans, he fet gestió de comandes, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="back2" class="btn">Enrere</button>
+          <button id="toStep4" class="btn primary">Veure resultat</button>
+        </div>
       </div>
-    </main>
+
+      <!-- PAS 4 -->
+      <div id="step4" class="step">
+        <h2>Pas 4 · Resultat orientatiu</h2>
+
+        <div id="resultSummary" class="summary"></div>
+        <div id="resultList" class="results"></div>
+
+        <div class="next">
+          <h3>Passos recomanats</h3>
+          <ol>
+            <li>Reuneix documentació: CV, vida laboral, certificats i cursos.</li>
+            <li>Demana cita al Punt d’Informació per assessorament formal.</li>
+            <li>Si tens dubtes sobre tasques concretes, prepara exemples (3–6 funcions per lloc de feina).</li>
+          </ol>
+        </div>
+
+        <div class="actions">
+          <button id="back3" class="btn">Enrere</button>
+          <button id="restart" class="btn primary">Fer un altre prediagnòstic</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>© Sistema digital d’orientació (MVP)</span>
+      <span class="muted">Catalunya · orientatiu i no vinculant</span>
+    </footer>
   </div>
 
-  <script src="/app.js"></script>
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
