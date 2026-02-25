@@ -99,7 +99,20 @@ function eduBoostToTargetLevel(){
 
   return lvl;
 }
-
+const SYNONYMS = {
+  "gent gran": "geriatria",
+  "avis": "geriatria",
+  "persones grans": "geriatria",
+  "moviments": "mobilitzacions",
+  "mobilitzar": "mobilitzacions",
+  "netejar": "higiene",
+  "caixa registradora": "tpv",
+  "cuidador": "dependència",
+  "cuidar": "dependència",
+  "auxiliar": "suport",
+  "facturacio": "factures",
+  "comptabilitat": "factures"
+};
 function computeResults(){
   const f = familyObj();
   if(!f) return [];
