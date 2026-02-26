@@ -39,7 +39,9 @@ jobs:
               .toLowerCase();
           }
 
-          csv()
+          csv({
+            delimiter: ';'
+          })
             .fromFile('data/cp_uc_base.csv')
             .then(rows=>{
               const grouped = {};
@@ -51,12 +53,12 @@ jobs:
                   r[keys.find(k => clean(k).includes(match))];
 
                 const cp = get('certificat');
-                const nom = get('descripcio');
+                const nom = get('descrip');
                 const nivell = get('nivell');
-                const familia = get('familia');
+                const familia = get('fam');
                 const hores = get('hores');
                 const uc = get('competenc');
-                const ucDesc = get('competencia');
+                const ucDesc = get('descripcio de la compet');
                 const durada = get('durada');
 
                 if(!cp) return;
