@@ -29,7 +29,7 @@ jobs:
           const results = {};
 
           fs.createReadStream('data/cp_uc_base.csv')
-            .pipe(csv())
+            .pipe(csv({ separator: ';' }))
             .on('data', (row) => {
               const cp = row['Certificat de Professionalitat'];
               if (!cp) return;
