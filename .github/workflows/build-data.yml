@@ -3,7 +3,7 @@ name: Build CP JSON
 on:
   push:
     paths:
-      - 'data/cp_uc_base.csv'
+      - 'data/*.csv'
 
 jobs:
   build:
@@ -12,58 +12,30 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Node
+      - name: Set up Node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Install dependencies
-        run: npm install csv-parser fs
+      - name: Install csv parser
+        run: npm install csvtojson
 
       - name: Convert CSV to JSON
         run: |
-          node << 'EOF'
-          const fs = require('fs');
-          const csv = require('csv-parser');
-
-          const results = {};
-
-          fs.createReadStream('data/cp_uc_base.csv')
-            .pipe(csv({ separator: ';' }))
-            .on('data', (row) => {
-              const cp = row['Certificat de Professionalitat'];
-              if (!cp) return;
-
-              if (!results[cp]) {
-                results[cp] = {
-                  codi: cp,
-                  nom: row['Descripció'],
-                  nivell: row['NivellEspecialitat'],
-                  familia: row['FamProfDescCat'],
-                  hores: row['Hores'],
-                  uc: []
-                };
-              }
-
-              results[cp].uc.push({
-                codi: row['Competències'],
-                nom: row['Descripció de la competència'],
-                durada: row['Durada']
-              });
-            })
-            .on('end', () => {
-              fs.mkdirSync('public', { recursive: true });
-              fs.writeFileSync(
-                'public/data_cp.json',
-                JSON.stringify(Object.values(results), null, 2)
-              );
+          node -e "
+          const csv=require('csvtojson');
+          const fs=require('fs');
+          csv()
+            .fromFile('data/cp_uc_base.csv')
+            .then(json=>{
+              fs.writeFileSync('public/data_cp.json', JSON.stringify(json,null,2));
             });
-          EOF
+          "
 
-      - name: Commit JSON
+      - name: Commit JSON if changed
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git add public/data_cp.json
-          git commit -m "Auto build CP JSON" || echo "No changes"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update data_cp.json"
           git push
