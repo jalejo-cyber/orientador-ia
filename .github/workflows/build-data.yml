@@ -4,10 +4,14 @@ on:
   push:
     paths:
       - 'data/*.csv'
+      - '.github/workflows/build-data.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
@@ -56,6 +60,10 @@ jobs:
 
               const result = Object.values(grouped);
 
+              if (!fs.existsSync('public')){
+                fs.mkdirSync('public');
+              }
+
               fs.writeFileSync(
                 'public/data_cp.json',
                 JSON.stringify(result, null, 2)
@@ -63,11 +71,11 @@ jobs:
             });
           "
 
-     - name: Commit JSON if changed
-  run: |
-    git config user.name github-actions
-    git config user.email github-actions@github.com
-    git add public/data_cp.json
-    git diff --quiet && git diff --staged --quiet || git commit -m "Update structured data_cp.json"
-    git pull --rebase
-    git push
+      - name: Commit JSON if changed
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add public/data_cp.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update structured data_cp.json"
+          git pull --rebase
+          git push
