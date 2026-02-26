@@ -33,9 +33,15 @@ jobs:
 
           const grouped = {};
 
+          const cleanNumber = (val) => {
+            if (!val) return null;
+            const cleaned = val.toString().replace(',', '').trim();
+            const num = Number(cleaned);
+            return isNaN(num) ? null : num;
+          };
+
           for (let i = 1; i < lines.length; i++) {
             const cols = lines[i].split(';');
-
             if (cols.length < 3) continue;
 
             const row = {};
@@ -50,19 +56,25 @@ jobs:
               grouped[cp] = {
                 codi: cp,
                 nom: row['Descripció'] || null,
-                nivell: Number(row['NivellEspecialitat']) || null,
+                nivell: cleanNumber(row['NivellEspecialitat']),
                 familia: row['FamProfDescCat'] || null,
-                hores: Number(row['Hores']) || null,
+                hores: cleanNumber(row['Hores']),
                 competencies: []
               };
             }
 
             if (row['Competències']) {
-              grouped[cp].competencies.push({
-                codi: row['Competències'],
-                descripcio: row['Descripció de la competència'] || null,
-                durada: Number(row['Durada']) || null
-              });
+              const existing = grouped[cp].competencies.find(
+                c => c.codi === row['Competències']
+              );
+
+              if (!existing) {
+                grouped[cp].competencies.push({
+                  codi: row['Competències'],
+                  descripcio: row['Descripció de la competència'] || null,
+                  durada: cleanNumber(row['Durada'])
+                });
+              }
             }
           }
 
