@@ -21,79 +21,61 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install csv parser
-        run: npm install csvtojson
-        
       - name: Convert CSV to structured JSON
         run: |
           node -e "
-          const csv=require('csvtojson');
-          const fs=require('fs');
+          const fs = require('fs');
 
-          function clean(str){
-            return (str||'')
-              .toString()
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '')
-              .trim()
-              .toLowerCase();
+          const raw = fs.readFileSync('data/cp_uc_base.csv', 'utf8');
+          const lines = raw.split('\n').filter(l => l.trim());
+
+          const headers = lines[0].split(';').map(h => h.trim());
+
+          const grouped = {};
+
+          for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split(';');
+
+            if (cols.length < 3) continue;
+
+            const row = {};
+            headers.forEach((h, index) => {
+              row[h] = cols[index];
+            });
+
+            const cp = row['Certificat de Professionalitat'];
+            if (!cp) continue;
+
+            if (!grouped[cp]) {
+              grouped[cp] = {
+                codi: cp,
+                nom: row['Descripció'] || null,
+                nivell: Number(row['NivellEspecialitat']) || null,
+                familia: row['FamProfDescCat'] || null,
+                hores: Number(row['Hores']) || null,
+                competencies: []
+              };
+            }
+
+            if (row['Competències']) {
+              grouped[cp].competencies.push({
+                codi: row['Competències'],
+                descripcio: row['Descripció de la competència'] || null,
+                durada: Number(row['Durada']) || null
+              });
+            }
           }
 
-          csv({
-            delimiter: ';'
-          })
-            .fromFile('data/cp_uc_base.csv')
-            .then(rows=>{
-              const grouped = {};
+          const result = Object.values(grouped);
 
-              rows.forEach(r=>{
-                const keys = Object.keys(r);
+          if (!fs.existsSync('public')) {
+            fs.mkdirSync('public');
+          }
 
-                const get = (match) =>
-                  r[keys.find(k => clean(k).includes(match))];
-
-                const cp = get('certificat');
-                const nom = get('descrip');
-                const nivell = get('nivell');
-                const familia = get('fam');
-                const hores = get('hores');
-                const uc = get('competenc');
-                const ucDesc = get('descripcio de la compet');
-                const durada = get('durada');
-
-                if(!cp) return;
-
-                if(!grouped[cp]){
-                  grouped[cp] = {
-                    codi: cp,
-                    nom: nom || null,
-                    nivell: Number(nivell) || null,
-                    familia: familia || null,
-                    hores: Number(hores) || null,
-                    competencies: []
-                  };
-                }
-
-                if(uc){
-                  grouped[cp].competencies.push({
-                    codi: uc,
-                    descripcio: ucDesc || null,
-                    durada: Number(durada) || null
-                  });
-                }
-              });
-
-              const result = Object.values(grouped);
-
-              if (!fs.existsSync('public')){
-                fs.mkdirSync('public');
-              }
-
-              fs.writeFileSync(
-                'public/data_cp.json',
-                JSON.stringify(result, null, 2)
-              );
-            });
+          fs.writeFileSync(
+            'public/data_cp.json',
+            JSON.stringify(result, null, 2)
+          );
           "
 
       - name: Commit JSON if changed
