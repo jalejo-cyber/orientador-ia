@@ -24,11 +24,20 @@ jobs:
       - name: Install csv parser
         run: npm install csvtojson
 
-      - name: Convert CSV to structured JSON
+            - name: Convert CSV to structured JSON
         run: |
           node -e "
           const csv=require('csvtojson');
           const fs=require('fs');
+
+          function clean(str){
+            return (str||'')
+              .toString()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .trim()
+              .toLowerCase();
+          }
 
           csv()
             .fromFile('data/cp_uc_base.csv')
@@ -36,24 +45,38 @@ jobs:
               const grouped = {};
 
               rows.forEach(r=>{
-                const cp = r['Certificat de Professionalitat'];
+                const keys = Object.keys(r);
+
+                const get = (match) =>
+                  r[keys.find(k => clean(k).includes(match))];
+
+                const cp = get('certificat');
+                const nom = get('descripcio');
+                const nivell = get('nivell');
+                const familia = get('familia');
+                const hores = get('hores');
+                const uc = get('competenc');
+                const ucDesc = get('competencia');
+                const durada = get('durada');
+
+                if(!cp) return;
 
                 if(!grouped[cp]){
                   grouped[cp] = {
                     codi: cp,
-                    nom: r['Descripció'],
-                    nivell: Number(r['NivellEspecialitat']) || null,
-                    familia: r['FamProfDescCat'],
-                    hores: Number(r['Hores']) || null,
+                    nom: nom || null,
+                    nivell: Number(nivell) || null,
+                    familia: familia || null,
+                    hores: Number(hores) || null,
                     competencies: []
                   };
                 }
 
-                if(r['Competències']){
+                if(uc){
                   grouped[cp].competencies.push({
-                    codi: r['Competències'],
-                    descripcio: r['Descripció de la competència'],
-                    durada: Number(r['Durada']) || null
+                    codi: uc,
+                    descripcio: ucDesc || null,
+                    durada: Number(durada) || null
                   });
                 }
               });
