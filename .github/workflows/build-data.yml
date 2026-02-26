@@ -63,10 +63,11 @@ jobs:
             });
           "
 
-      - name: Commit JSON if changed
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add public/data_cp.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update structured data_cp.json"
-          git push
+     - name: Commit JSON if changed
+  run: |
+    git config user.name github-actions
+    git config user.email github-actions@github.com
+    git add public/data_cp.json
+    git diff --quiet && git diff --staged --quiet || git commit -m "Update structured data_cp.json"
+    git pull --rebase
+    git push
