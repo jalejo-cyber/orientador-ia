@@ -1765,7 +1765,7 @@
     "competencies": [
       {
         "codi": "UC0859_1",
-        "descripcio": "??Manipular blocs, bitlles i \"rachones\" de pedra natural",
+        "descripcio": "\"??Manipular blocs, bitlles i \"\"rachones\"\" de pedra natural\"",
         "durada": null
       },
       {
@@ -7573,7 +7573,7 @@
       },
       {
         "codi": "UC1454_3",
-        "descripcio": "Afavorir la participació de les dones i la creació de xarxes estables que, des de la perspectiva de gènere, impulsin el canvi d'actituds en la societat i l'\"empoderament\" de les dones",
+        "descripcio": "\"Afavorir la participació de les dones i la creació de xarxes estables que, des de la perspectiva de gènere, impulsin el canvi d'actituds en la societat i l'\"\"empoderament\"\" de les dones\"",
         "durada": null
       },
       {
@@ -7588,7 +7588,7 @@
       },
       {
         "codi": "UC1454_3",
-        "descripcio": "Afavorir la participació de les dones i la creació de xarxes estables que, des de la perspectiva de gènere, impulsin el canvi d'actituds en la societat i l'\"empoderament\" de les dones",
+        "descripcio": "\"Afavorir la participació de les dones i la creació de xarxes estables que, des de la perspectiva de gènere, impulsin el canvi d'actituds en la societat i l'\"\"empoderament\"\" de les dones\"",
         "durada": null
       }
     ]
@@ -10327,7 +10327,7 @@
       },
       {
         "codi": "UC2132_3",
-        "descripcio": "Realitzar l'examen inicial d'inspecció \"ante mortem\" d'animals, controlant les operacions prèvies al sacrifici",
+        "descripcio": "\"Realitzar l'examen inicial d'inspecció \"\"ante mortem\"\" d'animals, controlant les operacions prèvies al sacrifici\"",
         "durada": null
       },
       {
@@ -10347,12 +10347,12 @@
       },
       {
         "codi": "UC2132_3",
-        "descripcio": "Realitzar l'examen inicial d'inspecció \"ante mortem\" d'animals, controlant les operacions prèvies al sacrifici",
+        "descripcio": "\"Realitzar l'examen inicial d'inspecció \"\"ante mortem\"\" d'animals, controlant les operacions prèvies al sacrifici\"",
         "durada": null
       },
       {
         "codi": "UC2133_3",
-        "descripcio": "Realitzar l'examen inicial d'inspecció \"post mortem\" de canals i menuts",
+        "descripcio": "\"Realitzar l'examen inicial d'inspecció \"\"post mortem\"\" de canals i menuts\"",
         "durada": null
       },
       {
@@ -10362,17 +10362,17 @@
       },
       {
         "codi": "UC2132_3",
-        "descripcio": "Realitzar l'examen inicial d'inspecció \"ante mortem\" d'animals, controlant les operacions prèvies al sacrifici",
+        "descripcio": "\"Realitzar l'examen inicial d'inspecció \"\"ante mortem\"\" d'animals, controlant les operacions prèvies al sacrifici\"",
         "durada": null
       },
       {
         "codi": "UC2133_3",
-        "descripcio": "Realitzar l'examen inicial d'inspecció \"post mortem\" de canals i menuts",
+        "descripcio": "\"Realitzar l'examen inicial d'inspecció \"\"post mortem\"\" de canals i menuts\"",
         "durada": null
       },
       {
         "codi": "UC2133_3",
-        "descripcio": "Realitzar l'examen inicial d'inspecció \"post mortem\" de canals i menuts",
+        "descripcio": "\"Realitzar l'examen inicial d'inspecció \"\"post mortem\"\" de canals i menuts\"",
         "durada": null
       },
       {
@@ -10382,7 +10382,7 @@
       },
       {
         "codi": "UC2133_3",
-        "descripcio": "Realitzar l'examen inicial d'inspecció \"post mortem\" de canals i menuts",
+        "descripcio": "\"Realitzar l'examen inicial d'inspecció \"\"post mortem\"\" de canals i menuts\"",
         "durada": null
       },
       {
@@ -17717,7 +17717,7 @@
   },
   {
     "codi": "SSCE20",
-    "nom": "Competències digitals per a formadors i tutors segons el \"marc comú de competència digital docent-digcomp\"",
+    "nom": "\"Competències digitals per a formadors i tutors segons el \"\"marc comú de competència digital docent-digcomp\"\"\"",
     "nivell": 2,
     "familia": "SERVEIS SOCIOCULTURALS I A LA COMUNITAT",
     "hores": null,
@@ -18586,7 +18586,7 @@
       },
       {
         "codi": "noUC_MP0207",
-        "descripcio": "Mòdul de pràctiques professionals no laborals de \"Mecanització per abrasió, electroerosió i procediments especials\"",
+        "descripcio": "\"Mòdul de pràctiques professionals no laborals de \"\"Mecanització per abrasió, electroerosió i procediments especials\"\"\"",
         "durada": null
       },
       {
@@ -20655,7 +20655,7 @@
   },
   {
     "codi": "IFCT19",
-    "nom": "Enginyer de sistemes \"RED HAT LINUX\"",
+    "nom": "\"Enginyer de sistemes \"\"RED HAT LINUX\"\"\"",
     "nivell": 3,
     "familia": "INFORMÀTICA I COMUNICACIONS",
     "hores": null,
@@ -26990,7 +26990,7 @@
       },
       {
         "codi": "UC1390_2",
-        "descripcio": "Muntar i mantenir sistemes i equips de transport de \"graneles\" pneumàtics i hidràulics",
+        "descripcio": "\"Muntar i mantenir sistemes i equips de transport de \"\"graneles\"\" pneumàtics i hidràulics\"",
         "durada": null
       }
     ]
@@ -37805,7 +37805,7 @@
   },
   {
     "codi": "IFCD11",
-    "nom": "Administració i desenvolupament de servidor d'aplicacions \"RED HAT JBOSS\"",
+    "nom": "\"Administració i desenvolupament de servidor d'aplicacions \"\"RED HAT JBOSS\"\"\"",
     "nivell": 3,
     "familia": "INFORMÀTICA I COMUNICACIONS",
     "hores": null,
@@ -50359,7 +50359,7 @@
   },
   {
     "codi": "ELEM05",
-    "nom": "Instal·lació i manteniment de robots col·laboratius \"COBOTS\"",
+    "nom": "\"Instal·lació i manteniment de robots col·laboratius \"\"COBOTS\"\"\"",
     "nivell": 2,
     "familia": "ELECTRICITAT I ELECTRÒNICA",
     "hores": null,
