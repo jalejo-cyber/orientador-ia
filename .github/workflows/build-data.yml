@@ -23,8 +23,8 @@ jobs:
 
       - name: Install csv parser
         run: npm install csvtojson
-
-            - name: Convert CSV to structured JSON
+        
+      - name: Convert CSV to structured JSON
         run: |
           node -e "
           const csv=require('csvtojson');
