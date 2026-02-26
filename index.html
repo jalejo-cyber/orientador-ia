@@ -1,199 +1,240 @@
-<!DOCTYPE html>
-<html lang="ca">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Sistema digital d’orientació · Foment Formació</title>
+const $ = (id) => document.getElementById(id);
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+const progressFill = $("progressFill");
+const progressText = $("progressText");
 
-  <link rel="stylesheet" href="./styles.css" />
-</head>
-<body>
-  <div class="page">
-    <header class="header">
-      <div class="brand">
-        <div class="brand-mark">FF</div>
-        <div class="brand-text">
-          <div class="brand-title">Foment Formació</div>
-          <div class="brand-sub">Sistema digital d’orientació · Catalunya</div>
+const step1 = $("step1");
+const step2 = $("step2");
+const step3 = $("step3");
+
+const familyGrid = $("familyGrid");
+const tasksBox = $("tasksBox");
+
+const yearsFamily = $("yearsFamily");
+const yearsFamilyLabel = $("yearsFamilyLabel");
+const status = $("status");
+const freeText = $("freeText");
+
+const formalEdu = $("formalEdu");
+const courseHours = $("courseHours");
+
+const resultSection = $("resultSection");
+const resultSummary = $("resultSummary");
+const resultList = $("resultList");
+const downloadPdfBtn = $("downloadPdfBtn");
+const restartBtn = $("restartBtn");
+
+const s1Next = $("s1Next");
+const s2Back = $("s2Back");
+const s2Next = $("s2Next");
+const s3Back = $("s3Back");
+const calcBtn = $("calcBtn");
+
+let DATA = [];
+let selectedFamily = "";
+let lastResults = [];
+
+/* -----------------------
+   LOAD REAL DATA
+------------------------ */
+
+async function loadData(){
+  const res = await fetch("./public/data_cp.json");
+  DATA = await res.json();
+  renderFamilies();
+}
+
+loadData();
+
+/* -----------------------
+   TEXT NORMALIZER
+------------------------ */
+
+function normalizeText(input){
+  if(!input) return "";
+  return input.toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+/* -----------------------
+   STEP UI
+------------------------ */
+
+function setStep(n){
+  step1.classList.toggle("step-active", n===1);
+  step2.classList.toggle("step-active", n===2);
+  step3.classList.toggle("step-active", n===3);
+
+  const pct = n===1 ? 33 : n===2 ? 66 : 100;
+  progressFill.style.width = pct+"%";
+  progressText.textContent = "Pas "+n+" de 3";
+}
+
+/* -----------------------
+   FAMILIES (dynamic)
+------------------------ */
+
+function renderFamilies(){
+  const families = [...new Set(DATA.map(d=>d.familia).filter(Boolean))];
+
+  familyGrid.innerHTML = families.map(f=>`
+    <div class="family-card ${selectedFamily===f?'selected':''}" data-id="${f}">
+      <div>
+        <div class="family-title">${f}</div>
+        <div class="family-desc">Certificats professionals SOC</div>
+      </div>
+    </div>
+  `).join("");
+
+  familyGrid.querySelectorAll(".family-card").forEach(el=>{
+    el.addEventListener("click",()=>{
+      selectedFamily = el.getAttribute("data-id");
+      renderFamilies();
+    });
+  });
+}
+
+/* -----------------------
+   LEVEL PREFERENCE
+------------------------ */
+
+function eduPreferredLevel(){
+  const edu = formalEdu.value;
+  if(edu==="cap") return 1;
+  if(edu==="eso") return 2;
+  if(edu==="fp1") return 2;
+  if(edu==="fp2") return 3;
+  return 1;
+}
+
+/* -----------------------
+   HYBRID ENGINE
+------------------------ */
+
+function scoreQualificationsHybrid(){
+
+  const text = normalizeText(freeText.value);
+  const y = Number(yearsFamily.value || 0);
+  const prefLevel = eduPreferredLevel();
+
+  const results = DATA.map(cp=>{
+
+    let score = 0;
+    const why = [];
+
+    // Family match
+    if(selectedFamily && cp.familia===selectedFamily){
+      score += 30;
+      why.push("Família professional coherent");
+    }
+
+    // Keyword matching in UC
+    let matches = 0;
+
+    cp.competencies.forEach(uc=>{
+      const desc = normalizeText(uc.descripcio);
+      if(text && desc.includes(text)){
+        matches++;
+      }
+    });
+
+    if(matches){
+      score += matches * 10;
+      why.push("Coincidència amb unitats de competència: "+matches);
+    }
+
+    // Experience
+    if(y>=2){
+      score += 15;
+      why.push("Experiència rellevant");
+    }
+
+    // Level coherence
+    if(cp.nivell===prefLevel){
+      score += 10;
+      why.push("Nivell coherent amb formació");
+    }
+
+    return {...cp, score, why};
+
+  });
+
+  return results
+    .filter(r=>r.score>20)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,6);
+}
+
+/* -----------------------
+   RENDER RESULT
+------------------------ */
+
+function renderResult(){
+
+  const results = scoreQualificationsHybrid();
+  lastResults = results;
+
+  if(!results.length){
+    resultList.innerHTML = `
+      <div class="result-card">
+        <strong>No s’han detectat coincidències clares.</strong>
+        <div class="why">Prova a afegir més descripció de tasques.</div>
+      </div>
+    `;
+  }else{
+
+    resultList.innerHTML = results.map(r=>`
+
+      <div class="result-card">
+        <div class="result-top">
+          <div>
+            <div><strong>${r.codi}</strong> · Nivell ${r.nivell}</div>
+            <div style="margin-top:4px">${r.nom}</div>
+          </div>
+          <div class="tag">${r.score} punts</div>
+        </div>
+
+        <div class="why">
+          <strong>Indicadors:</strong>
+          <ul>
+            ${r.why.map(w=>"<li>"+w+"</li>").join("")}
+          </ul>
         </div>
       </div>
 
-      <div class="header-right">
-        <div class="pill">Orientatiu · No vinculant</div>
-      </div>
-    </header>
+    `).join("");
+  }
 
-    <main class="card">
-      <div class="hero">
-        <h1>Prediagnòstic orientatiu d’acreditació de competències</h1>
-        <p>
-          Respon 3 passos i obtindràs una orientació inicial sobre possibles qualificacions i nivell (1–3).
-          Aquest resultat <strong>no substitueix</strong> la validació del procediment oficial.
-        </p>
-      </div>
+  resultSection.classList.remove("hidden");
+  resultSection.scrollIntoView({behavior:"smooth"});
+}
 
-      <!-- Progress -->
-      <div class="progress">
-        <div class="progress-top">
-          <div class="progress-title">Progrés</div>
-          <div id="progressText" class="progress-text">Pas 1 de 3</div>
-        </div>
-        <div class="progress-bar">
-          <div id="progressFill" class="progress-fill"></div>
-        </div>
-      </div>
+/* -----------------------
+   EVENTS
+------------------------ */
 
-      <!-- STEP 1 -->
-      <section id="step1" class="step step-active">
-        <div class="step-head">
-          <div class="step-num">1</div>
-          <div>
-            <h2>Selecciona l’àmbit professional principal</h2>
-            <p class="muted">Tria l’àmbit on has acumulat més experiència.</p>
-          </div>
-        </div>
+s1Next.addEventListener("click",()=>setStep(2));
+s2Back.addEventListener("click",()=>setStep(1));
+s2Next.addEventListener("click",()=>setStep(3));
+s3Back.addEventListener("click",()=>setStep(2));
+calcBtn.addEventListener("click",renderResult);
 
-        <div id="familyGrid" class="family-grid"></div>
+yearsFamily.addEventListener("input",()=>{
+  const v = Number(yearsFamily.value);
+  yearsFamilyLabel.textContent = v>=15 ? "15+" : v;
+});
 
-        <div class="actions">
-          <button id="s1Next" class="btn btn-primary">Continuar</button>
-        </div>
-      </section>
-
-      <!-- STEP 2 -->
-      <section id="step2" class="step">
-        <div class="step-head">
-          <div class="step-num">2</div>
-          <div>
-            <h2>Experiència professional</h2>
-            <p class="muted">Marca tasques habituals i indica anys aproximats.</p>
-          </div>
-        </div>
-
-        <div class="grid2">
-          <div class="field">
-            <label>Anys d’experiència en aquest àmbit</label>
-            <div class="range">
-              <input id="yearsFamily" type="range" min="0" max="15" value="0" />
-              <div class="range-meta">
-                <span>0</span>
-                <span id="yearsFamilyLabel" class="range-value">0</span>
-                <span>15+</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Situació actual (opcional)</label>
-            <select id="status">
-              <option value="">Selecciona</option>
-              <option value="atur">En situació d’atur</option>
-              <option value="treballant">Treballant</option>
-              <option value="estudiant">Estudiant</option>
-              <option value="altres">Altres</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Tasques realitzades habitualment</label>
-          <div id="tasksBox" class="tasks-grid"></div>
-          <div class="hint">Consell: marca 3–6 tasques si pots. Millora la precisió.</div>
-        </div>
-
-        <div class="field">
-          <label>Descripció breu addicional (opcional)</label>
-          <textarea id="freeText" rows="3" placeholder="Ex: factures i arxiu / cures i mobilitzacions / TPV i reposició..."></textarea>
-        </div>
-
-        <div class="actions">
-          <button id="s2Back" class="btn">Enrere</button>
-          <button id="s2Next" class="btn btn-primary">Continuar</button>
-        </div>
-      </section>
-
-      <!-- STEP 3 -->
-      <section id="step3" class="step">
-        <div class="step-head">
-          <div class="step-num">3</div>
-          <div>
-            <h2>Formació</h2>
-            <p class="muted">Ajusta l’orientació del nivell (1–3).</p>
-          </div>
-        </div>
-
-        <div class="grid2">
-          <div class="field">
-            <label>Formació reglada relacionada</label>
-            <select id="formalEdu">
-              <option value="">Selecciona</option>
-              <option value="cap">Cap</option>
-              <option value="eso">ESO / Graduat escolar</option>
-              <option value="fp1">FP / CFGM (aprox. nivell 2)</option>
-              <option value="fp2">CFGS / Universitat (aprox. nivell 3)</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label>Hores aproximades de formació complementària</label>
-            <select id="courseHours">
-              <option value="">Selecciona</option>
-              <option value="0">0 h</option>
-              <option value="1_49">1–49 h</option>
-              <option value="50_199">50–199 h</option>
-              <option value="200_499">200–499 h</option>
-              <option value="500_plus">500+ h</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button id="s3Back" class="btn">Enrere</button>
-          <button id="calcBtn" class="btn btn-primary">
-            <span class="btn-icon">✓</span> Obtenir orientació
-          </button>
-        </div>
-      </section>
-
-      <!-- RESULT (same page) -->
-      <section id="resultSection" class="result hidden">
-        <div class="result-head">
-          <div>
-            <h2>Resultat orientatiu</h2>
-            <p class="muted">Proposta inicial basada en les dades facilitades.</p>
-          </div>
-          <div class="result-actions">
-            <button id="downloadPdfBtn" class="btn btn-primary">
-              Descarregar informe PDF
-            </button>
-            <button id="restartBtn" class="btn">Reiniciar</button>
-          </div>
-        </div>
-
-        <div id="resultSummary" class="summary"></div>
-        <div id="resultList" class="results"></div>
-
-        <div class="legal">
-          <strong>Avís:</strong> Aquest resultat és orientatiu i no substitueix la validació oficial del procediment d’acreditació.
-        </div>
-      </section>
-
-    </main>
-
-    <footer class="footer">
-      <span>© Foment Formació</span>
-      <span class="muted">Sistema digital d’orientació · MVP</span>
-    </footer>
-  </div>
-
-  <!-- jsPDF (client-side, gratis) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <script src="./data.js"></script>
-  <script src="./app.js"></script>
-</body>
-</html>
+restartBtn.addEventListener("click",()=>{
+  selectedFamily="";
+  freeText.value="";
+  yearsFamily.value=0;
+  formalEdu.value="";
+  resultSection.classList.add("hidden");
+  renderFamilies();
+  setStep(1);
+});
