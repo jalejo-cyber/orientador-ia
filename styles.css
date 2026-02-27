@@ -5,8 +5,13 @@ body{
   color:#111827;
 }
 
+:root{
+  --primary:#C1121F;
+  --primary-soft:#FDE8EA;
+}
+
 .container{
-  max-width:900px;
+  max-width:1000px;
   margin:40px auto;
   padding:20px;
 }
@@ -14,6 +19,7 @@ body{
 h1{
   font-size:28px;
   margin-bottom:4px;
+  color:var(--primary);
 }
 
 .subtitle{
@@ -31,7 +37,7 @@ h1{
 #progressFill{
   height:100%;
   width:33%;
-  background:#7c3aed;
+  background:var(--primary);
   transition:0.3s;
 }
 
@@ -66,12 +72,12 @@ h1{
 }
 
 .family-card:hover{
-  border-color:#7c3aed;
+  border-color:var(--primary);
 }
 
 .family-card.selected{
-  border:2px solid #7c3aed;
-  background:#f5f3ff;
+  border:2px solid var(--primary);
+  background:var(--primary-soft);
 }
 
 .family-title{
@@ -85,7 +91,7 @@ label{
   font-weight:500;
 }
 
-textarea, select{
+textarea, select, input[type="number"]{
   width:100%;
   padding:10px;
   border-radius:8px;
@@ -105,7 +111,7 @@ input[type="range"]{
 }
 
 .btn.primary{
-  background:#7c3aed;
+  background:var(--primary);
   color:white;
   border:none;
 }
@@ -125,8 +131,8 @@ input[type="range"]{
 }
 
 .tag{
-  background:#ede9fe;
-  color:#6d28d9;
+  background:var(--primary-soft);
+  color:var(--primary);
   padding:4px 10px;
   border-radius:999px;
   font-size:12px;
