@@ -39,7 +39,7 @@ let lastResults = [];
 ------------------------ */
 
 async function loadData(){
-  const res = await fetch("./public/data_cp.json");
+  const res = await fetch("/data_cp.json");
   DATA = await res.json();
   renderFamilies();
 }
