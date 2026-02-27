@@ -17,6 +17,8 @@ const yearsFamily = $("yearsFamily");
 const yearsFamilyLabel = $("yearsFamilyLabel");
 const freeText = $("freeText");
 const formalEdu = $("formalEdu");
+const nonFormalHours = $("nonFormalHours");
+const cvUpload = $("cvUpload");
 
 const resultSection = $("resultSection");
 const resultList = $("resultList");
@@ -27,6 +29,7 @@ const s2Next = $("s2Next");
 const s3Back = $("s3Back");
 const calcBtn = $("calcBtn");
 const restartBtn = $("restartBtn");
+const generateReportBtn = $("generateReportBtn");
 
 /* -----------------------
    GLOBAL STATE
@@ -34,6 +37,7 @@ const restartBtn = $("restartBtn");
 
 let DATA = [];
 let selectedFamily = "";
+let cvExtractedText = "";
 
 /* -----------------------
    LOAD DATA
@@ -52,7 +56,7 @@ async function loadData(){
 loadData();
 
 /* -----------------------
-   TEXT NORMALIZER
+   NORMALITZADOR TEXT
 ------------------------ */
 
 function normalizeText(input){
@@ -66,19 +70,74 @@ function normalizeText(input){
     .trim();
 }
 
-function meetsAccessRequirement(level, edu){
+/* -----------------------
+   LECTURA CV (PDF o TXT)
+------------------------ */
 
-  if(level === 1) return true;
+cvUpload.addEventListener("change", async (event)=>{
+  const file = event.target.files[0];
+  if(!file) return;
+
+  if(file.type === "text/plain"){
+    const text = await file.text();
+    cvExtractedText = text;
+  }
+
+  if(file.type === "application/pdf"){
+    const reader = new FileReader();
+    reader.onload = async function(){
+      const typedarray = new Uint8Array(this.result);
+      const pdf = await pdfjsLib.getDocument(typedarray).promise;
+
+      let fullText = "";
+
+      for(let i=1;i<=pdf.numPages;i++){
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const strings = content.items.map(item => item.str);
+        fullText += strings.join(" ") + " ";
+      }
+
+      cvExtractedText = fullText;
+    };
+    reader.readAsArrayBuffer(file);
+  }
+});
+
+/* -----------------------
+   REQUISITS ACCÉS
+------------------------ */
+
+function accessExplanation(level, edu){
+
+  if(level === 1){
+    return {
+      ok:true,
+      message:"Nivell 1 no requereix titulació acadèmica formal."
+    };
+  }
 
   if(level === 2){
-    return ["eso","fp1","fp2","batx","grau"].includes(edu);
+    if(["eso","fp1","fp2","batx","grau"].includes(edu)){
+      return { ok:true, message:"Compleix requisits acadèmics per nivell 2." };
+    }
+    return {
+      ok:false,
+      message:"Per nivell 2 cal ESO o equivalent. Alternativament, prova de competències clau nivell 2."
+    };
   }
 
   if(level === 3){
-    return ["fp2","batx","grau"].includes(edu);
+    if(["fp2","batx","grau"].includes(edu)){
+      return { ok:true, message:"Compleix requisits acadèmics per nivell 3." };
+    }
+    return {
+      ok:false,
+      message:"Per nivell 3 cal Batxillerat, CFGS o equivalent. Alternativament, prova competències clau nivell 3."
+    };
   }
 
-  return false;
+  return { ok:false, message:"Nivell no identificat." };
 }
 
 /* -----------------------
@@ -120,17 +179,21 @@ function renderFamilies(){
 }
 
 /* -----------------------
-   CORE ENGINE
-   (Detecta UC coincidents)
+   MOTOR D’ANÀLISI
 ------------------------ */
 
 function analyzeCertificates(){
 
-  const text = normalizeText(freeText.value);
-  if(!text) return [];
+  const combinedText = normalizeText(
+    freeText.value + " " + cvExtractedText
+  );
 
-  const words = text.split(" ").filter(w => w.length > 3);
+  if(!combinedText) return [];
+
+  const words = combinedText.split(" ").filter(w => w.length > 3);
   const userEdu = formalEdu.value;
+  const extraHours = Number(nonFormalHours.value || 0);
+  const experienceYears = Number(yearsFamily.value || 0);
 
   const results = [];
 
@@ -163,8 +226,15 @@ function analyzeCertificates(){
 
     if(matchedUC.length > 0){
 
-      const coverage = Math.round((matchedUC.length / totalUC) * 100);
-      const accessOk = meetsAccessRequirement(cp.nivell, userEdu);
+      let coverage = Math.round((matchedUC.length / totalUC) * 100);
+
+      // Ajust per experiència i cursos no reglats
+      if(experienceYears >= 3) coverage += 5;
+      if(extraHours >= 100) coverage += 5;
+
+      if(coverage > 100) coverage = 100;
+
+      const access = accessExplanation(cp.nivell, userEdu);
 
       results.push({
         ...cp,
@@ -172,7 +242,7 @@ function analyzeCertificates(){
         matchedUC,
         unmatchedUC,
         coverage,
-        accessOk
+        access
       });
 
     }
@@ -183,7 +253,7 @@ function analyzeCertificates(){
 }
 
 /* -----------------------
-   RENDER RESULT
+   RENDER RESULTAT
 ------------------------ */
 
 function renderResult(){
@@ -210,8 +280,7 @@ function renderResult(){
       </div>
 
       <div style="margin-bottom:10px">
-        <strong>Cobertura detectada:</strong> ${cp.coverage}% 
-        (${cp.matchedUC.length} de ${cp.totalUC} UC)
+        <strong>Cobertura detectada:</strong> ${cp.coverage}%
       </div>
 
       <div style="margin-bottom:10px">
@@ -223,32 +292,11 @@ function renderResult(){
         </ul>
       </div>
 
-      <div style="margin-bottom:10px">
-        <strong>Unitats no detectades:</strong>
-        <ul>
-          ${cp.unmatchedUC.map(uc=>`
-            <li style="color:#6b7280">
-              ${uc.codi}
-            </li>
-          `).join("")}
-        </ul>
-      </div>
-
       <div>
-        <strong>Requisits d’accés:</strong> 
-        ${cp.accessOk 
-          ? `<span style="color:green">Compleix requisits</span>` 
-          : `<span style="color:red">No compleix requisits nivell ${cp.nivell}</span>`
-        }
-      </div>
-
-      <div style="margin-top:8px;font-size:13px;color:#6b7280">
-        ${
-          cp.coverage >= 70 
-            ? "Alta probabilitat d'acreditació gairebé completa."
-            : cp.coverage >= 40
-            ? "Acreditació parcial viable."
-            : "Cobertura baixa. Cal ampliar evidències."
+        <strong>Requisits d’accés:</strong>
+        ${cp.access.ok
+          ? `<span style="color:green">${cp.access.message}</span>`
+          : `<span style="color:red">${cp.access.message}</span>`
         }
       </div>
 
@@ -257,8 +305,41 @@ function renderResult(){
   `).join("");
 
   resultSection.classList.remove("hidden");
-  resultSection.scrollIntoView({behavior:"smooth"});
 }
+
+/* -----------------------
+   INFORME PDF
+------------------------ */
+
+generateReportBtn.addEventListener("click",()=>{
+
+  const results = analyzeCertificates();
+  if(!results.length) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const cp = results[0];
+
+  let y = 15;
+
+  doc.setFontSize(14);
+  doc.text("INFORME TÈCNIC D’ORIENTACIÓ", 10, y);
+  y+=10;
+
+  doc.setFontSize(11);
+  doc.text("Certificat: "+cp.codi,10,y); y+=6;
+  doc.text(cp.nom,10,y); y+=6;
+  doc.text("Nivell: "+cp.nivell,10,y); y+=10;
+
+  doc.text("Cobertura estimada: "+cp.coverage+"%",10,y); y+=10;
+
+  doc.text("Requisits d'accés:",10,y); y+=6;
+  doc.text(cp.access.message,10,y);
+
+  doc.save("Informe_orientacio_"+cp.codi+".pdf");
+
+});
 
 /* -----------------------
    EVENTS
@@ -278,8 +359,10 @@ yearsFamily.addEventListener("input",()=>{
 restartBtn.addEventListener("click",()=>{
   selectedFamily="";
   freeText.value="";
+  cvExtractedText="";
   yearsFamily.value=0;
   formalEdu.value="";
+  nonFormalHours.value="";
   resultSection.classList.add("hidden");
   renderFamilies();
   setStep(1);
