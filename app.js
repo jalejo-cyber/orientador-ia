@@ -195,7 +195,7 @@ function renderFamilies(){
   familyGrid.innerHTML = families.map(f=>`
     <div class="family-card ${selectedFamily===f?'selected':''}" data-id="${f}">
       <div class="family-title">${f}</div>
-      <div class="family-desc">Certificats professionals (SOC)</div>
+      <div class="family-desc">Certificats professionals</div>
     </div>
   `).join("");
 
