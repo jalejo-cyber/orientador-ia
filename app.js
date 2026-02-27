@@ -188,64 +188,73 @@ function analyzeCertificates(){
 
 function renderResult(){
 
-  const results = findMatchingCompetencies();
+  const results = analyzeCertificates();
 
   if(!results.length){
     resultList.innerHTML = `
       <div class="result-card">
-        <strong>No s’han detectat Unitats de Competència coincidents.</strong>
-        <div class="why">
-          Prova a descriure tasques més concretes (ex: facturació, atenció al client, manteniment, instal·lació, dependència, etc.).
-        </div>
+        <strong>No s’han detectat coincidències suficients.</strong>
       </div>
     `;
-  } else {
-
-    // Agrupar per certificat
-    const grouped = {};
-
-    results.forEach(r=>{
-      if(!grouped[r.cpCodi]){
-        grouped[r.cpCodi] = {
-          nom: r.cpNom,
-          nivell: r.nivell,
-          familia: r.familia,
-          ucs: []
-        };
-      }
-
-      grouped[r.cpCodi].ucs.push({
-        codi: r.ucCodi,
-        desc: r.ucDesc,
-        durada: r.durada
-      });
-    });
-
-    resultList.innerHTML = Object.entries(grouped).map(([codi, cp]) => `
-      <div class="result-card">
-
-        <div style="margin-bottom:10px">
-          <strong>${codi}</strong> · Nivell ${cp.nivell ?? "-"}
-          <div style="margin-top:4px">${cp.nom}</div>
-          <div style="font-size:13px; color:#6b7280">${cp.familia}</div>
-        </div>
-
-        <div>
-          <strong>Unitats de Competència detectades:</strong>
-          <ul>
-            ${cp.ucs.map(uc=>`
-              <li style="margin-bottom:8px">
-                <strong>${uc.codi}</strong><br>
-                ${uc.desc}
-                ${uc.durada ? `<div style="font-size:12px;color:#6b7280">Durada: ${uc.durada}h</div>` : ""}
-              </li>
-            `).join("")}
-          </ul>
-        </div>
-
-      </div>
-    `).join("");
+    return;
   }
+
+  resultList.innerHTML = results.map(cp=>`
+
+    <div class="result-card">
+
+      <div style="margin-bottom:10px">
+        <strong>${cp.codi}</strong> · Nivell ${cp.nivell}
+        <div>${cp.nom}</div>
+        <div style="font-size:13px;color:#6b7280">${cp.familia}</div>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <strong>Cobertura detectada:</strong> ${cp.coverage}% 
+        (${cp.matchedUC.length} de ${cp.totalUC} UC)
+      </div>
+
+      <div style="margin-bottom:10px">
+        <strong>Unitats detectades:</strong>
+        <ul>
+          ${cp.matchedUC.map(uc=>`
+            <li><strong>${uc.codi}</strong> – ${uc.descripcio}</li>
+          `).join("")}
+        </ul>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <strong>Unitats no detectades:</strong>
+        <ul>
+          ${cp.unmatchedUC.map(uc=>`
+            <li style="color:#6b7280">
+              ${uc.codi}
+            </li>
+          `).join("")}
+        </ul>
+      </div>
+
+      <div>
+        <strong>Requisits d’accés:</strong> 
+        ${cp.accessOk 
+          ? `<span style="color:green">Compleix requisits</span>` 
+          : `<span style="color:red">No compleix requisits nivell ${cp.nivell}</span>`
+        }
+      </div>
+
+      <div style="margin-top:8px;font-size:13px;color:#6b7280">
+        ${
+          cp.coverage >= 70 
+            ? "Alta probabilitat d'acreditació gairebé completa."
+            : cp.coverage >= 40
+            ? "Acreditació parcial viable."
+            : "Cobertura baixa. Cal ampliar evidències."
+        }
+      </div>
+
+    </div>
+
+  `).join("");
 
   resultSection.classList.remove("hidden");
   resultSection.scrollIntoView({behavior:"smooth"});
