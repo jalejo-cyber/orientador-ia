@@ -66,6 +66,21 @@ function normalizeText(input){
     .trim();
 }
 
+function meetsAccessRequirement(level, edu){
+
+  if(level === 1) return true;
+
+  if(level === 2){
+    return ["eso","fp1","fp2","batx","grau"].includes(edu);
+  }
+
+  if(level === 3){
+    return ["fp2","batx","grau"].includes(edu);
+  }
+
+  return false;
+}
+
 /* -----------------------
    STEP UI
 ------------------------ */
