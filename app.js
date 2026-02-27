@@ -249,7 +249,15 @@ function analyzeCertificates(){
 
   });
 
-  return results.sort((a,b)=> b.coverage - a.coverage);
+  return results.sort((a,b)=>{
+
+  // 1️⃣ Prioritat: compleix requisits
+  if(a.access.ok && !b.access.ok) return -1;
+  if(!a.access.ok && b.access.ok) return 1;
+
+  // 2️⃣ Després ordenar per cobertura
+  return b.coverage - a.coverage;
+});
 }
 
 /* -----------------------
@@ -258,14 +266,40 @@ function analyzeCertificates(){
 
 function renderResult(){
 
-  const results = analyzeCertificates();
+  // 1️⃣ Analitzem tots els resultats
+  const resultsAll = analyzeCertificates();
+
+  // guardem tots per al PDF
+  lastResults = resultsAll;
+
+  // 2️⃣ Només mostrem els que tenen cobertura >= 60%
+  const results = resultsAll
+    .filter(cp => cp.coverage >= 60)
+    .sort((a,b)=>{
+
+      // Primer els que compleixen requisits
+      if(a.access.ok && !b.access.ok) return -1;
+      if(!a.access.ok && b.access.ok) return 1;
+
+      // Després per cobertura
+      return b.coverage - a.coverage;
+    });
 
   if(!results.length){
     resultList.innerHTML = `
       <div class="result-card">
-        <strong>No s’han detectat coincidències suficients.</strong>
+        <strong>No hi ha coincidències suficients (mínim 60%).</strong>
+        <div style="margin-top:8px;color:#6b7280;font-size:14px;">
+          Prova a:
+          <ul>
+            <li>Afegir més detall a les funcions realitzades</li>
+            <li>Pujar el CV complet</li>
+            <li>Incloure hores de cursos no reglats</li>
+          </ul>
+        </div>
       </div>
     `;
+    resultSection.classList.remove("hidden");
     return;
   }
 
@@ -292,11 +326,21 @@ function renderResult(){
         </ul>
       </div>
 
-      <div>
-        <strong>Requisits d’accés:</strong>
+      <div style="margin-bottom:10px">
+        <strong>Requisits d’accés:</strong><br>
         ${cp.access.ok
-          ? `<span style="color:green">${cp.access.message}</span>`
-          : `<span style="color:red">${cp.access.message}</span>`
+          ? `<span style="color:green;font-weight:600;">
+               ✔ Administrativament viable
+             </span><br>
+             <span style="font-size:13px;color:#6b7280;">
+               ${cp.access.message}
+             </span>`
+          : `<span style="color:#C1121F;font-weight:600;">
+               ✖ No compleix requisits actuals
+             </span><br>
+             <span style="font-size:13px;color:#6b7280;">
+               ${cp.access.message}
+             </span>`
         }
       </div>
 
@@ -305,6 +349,7 @@ function renderResult(){
   `).join("");
 
   resultSection.classList.remove("hidden");
+  resultSection.scrollIntoView({behavior:"smooth"});
 }
 
 /* -----------------------
