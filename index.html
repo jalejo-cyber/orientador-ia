@@ -1,240 +1,72 @@
-const $ = (id) => document.getElementById(id);
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orientador Certificats Professionals</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
-const progressFill = $("progressFill");
-const progressText = $("progressText");
+<div class="container">
+  <h1>Orientador de Certificats Professionals</h1>
+  <p class="subtitle">Sistema híbrid basat en competències (SOC)</p>
 
-const step1 = $("step1");
-const step2 = $("step2");
-const step3 = $("step3");
+  <div class="progress">
+    <div id="progressFill"></div>
+  </div>
+  <div class="progress-text" id="progressText">Pas 1 de 3</div>
 
-const familyGrid = $("familyGrid");
-const tasksBox = $("tasksBox");
-
-const yearsFamily = $("yearsFamily");
-const yearsFamilyLabel = $("yearsFamilyLabel");
-const status = $("status");
-const freeText = $("freeText");
-
-const formalEdu = $("formalEdu");
-const courseHours = $("courseHours");
-
-const resultSection = $("resultSection");
-const resultSummary = $("resultSummary");
-const resultList = $("resultList");
-const downloadPdfBtn = $("downloadPdfBtn");
-const restartBtn = $("restartBtn");
-
-const s1Next = $("s1Next");
-const s2Back = $("s2Back");
-const s2Next = $("s2Next");
-const s3Back = $("s3Back");
-const calcBtn = $("calcBtn");
-
-let DATA = [];
-let selectedFamily = "";
-let lastResults = [];
-
-/* -----------------------
-   LOAD REAL DATA
------------------------- */
-
-async function loadData(){
-  const res = await fetch("./public/data_cp.json");
-  DATA = await res.json();
-  renderFamilies();
-}
-
-loadData();
-
-/* -----------------------
-   TEXT NORMALIZER
------------------------- */
-
-function normalizeText(input){
-  if(!input) return "";
-  return input.toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s]/g," ")
-    .replace(/\s+/g," ")
-    .trim();
-}
-
-/* -----------------------
-   STEP UI
------------------------- */
-
-function setStep(n){
-  step1.classList.toggle("step-active", n===1);
-  step2.classList.toggle("step-active", n===2);
-  step3.classList.toggle("step-active", n===3);
-
-  const pct = n===1 ? 33 : n===2 ? 66 : 100;
-  progressFill.style.width = pct+"%";
-  progressText.textContent = "Pas "+n+" de 3";
-}
-
-/* -----------------------
-   FAMILIES (dynamic)
------------------------- */
-
-function renderFamilies(){
-  const families = [...new Set(DATA.map(d=>d.familia).filter(Boolean))];
-
-  familyGrid.innerHTML = families.map(f=>`
-    <div class="family-card ${selectedFamily===f?'selected':''}" data-id="${f}">
-      <div>
-        <div class="family-title">${f}</div>
-        <div class="family-desc">Certificats professionals SOC</div>
-      </div>
+  <section id="step1" class="step step-active">
+    <h2>1. Família professional</h2>
+    <div id="familyGrid" class="family-grid"></div>
+    <div class="buttons">
+      <button id="s1Next" class="btn primary">Següent</button>
     </div>
-  `).join("");
+  </section>
 
-  familyGrid.querySelectorAll(".family-card").forEach(el=>{
-    el.addEventListener("click",()=>{
-      selectedFamily = el.getAttribute("data-id");
-      renderFamilies();
-    });
-  });
-}
+  <section id="step2" class="step">
+    <h2>2. Experiència</h2>
 
-/* -----------------------
-   LEVEL PREFERENCE
------------------------- */
+    <label>Anys d'experiència</label>
+    <input type="range" id="yearsFamily" min="0" max="15" value="0">
+    <div>Valor: <span id="yearsFamilyLabel">0</span></div>
 
-function eduPreferredLevel(){
-  const edu = formalEdu.value;
-  if(edu==="cap") return 1;
-  if(edu==="eso") return 2;
-  if(edu==="fp1") return 2;
-  if(edu==="fp2") return 3;
-  return 1;
-}
+    <label>Descriu tasques o funcions</label>
+    <textarea id="freeText" rows="4"></textarea>
 
-/* -----------------------
-   HYBRID ENGINE
------------------------- */
+    <div class="buttons">
+      <button id="s2Back" class="btn">Enrere</button>
+      <button id="s2Next" class="btn primary">Següent</button>
+    </div>
+  </section>
 
-function scoreQualificationsHybrid(){
+  <section id="step3" class="step">
+    <h2>3. Formació</h2>
 
-  const text = normalizeText(freeText.value);
-  const y = Number(yearsFamily.value || 0);
-  const prefLevel = eduPreferredLevel();
+    <label>Nivell formatiu</label>
+    <select id="formalEdu">
+      <option value="">Selecciona...</option>
+      <option value="cap">Sense titulació</option>
+      <option value="eso">ESO</option>
+      <option value="fp1">CFGM</option>
+      <option value="fp2">CFGS / Universitat</option>
+    </select>
 
-  const results = DATA.map(cp=>{
+    <div class="buttons">
+      <button id="s3Back" class="btn">Enrere</button>
+      <button id="calcBtn" class="btn primary">Calcular orientació</button>
+    </div>
+  </section>
 
-    let score = 0;
-    const why = [];
+  <section id="resultSection" class="hidden">
+    <h2>Resultats</h2>
+    <div id="resultList"></div>
+    <button id="restartBtn" class="btn">Reiniciar</button>
+  </section>
 
-    // Family match
-    if(selectedFamily && cp.familia===selectedFamily){
-      score += 30;
-      why.push("Família professional coherent");
-    }
+</div>
 
-    // Keyword matching in UC
-    let matches = 0;
-
-    cp.competencies.forEach(uc=>{
-      const desc = normalizeText(uc.descripcio);
-      if(text && desc.includes(text)){
-        matches++;
-      }
-    });
-
-    if(matches){
-      score += matches * 10;
-      why.push("Coincidència amb unitats de competència: "+matches);
-    }
-
-    // Experience
-    if(y>=2){
-      score += 15;
-      why.push("Experiència rellevant");
-    }
-
-    // Level coherence
-    if(cp.nivell===prefLevel){
-      score += 10;
-      why.push("Nivell coherent amb formació");
-    }
-
-    return {...cp, score, why};
-
-  });
-
-  return results
-    .filter(r=>r.score>20)
-    .sort((a,b)=>b.score-a.score)
-    .slice(0,6);
-}
-
-/* -----------------------
-   RENDER RESULT
------------------------- */
-
-function renderResult(){
-
-  const results = scoreQualificationsHybrid();
-  lastResults = results;
-
-  if(!results.length){
-    resultList.innerHTML = `
-      <div class="result-card">
-        <strong>No s’han detectat coincidències clares.</strong>
-        <div class="why">Prova a afegir més descripció de tasques.</div>
-      </div>
-    `;
-  }else{
-
-    resultList.innerHTML = results.map(r=>`
-
-      <div class="result-card">
-        <div class="result-top">
-          <div>
-            <div><strong>${r.codi}</strong> · Nivell ${r.nivell}</div>
-            <div style="margin-top:4px">${r.nom}</div>
-          </div>
-          <div class="tag">${r.score} punts</div>
-        </div>
-
-        <div class="why">
-          <strong>Indicadors:</strong>
-          <ul>
-            ${r.why.map(w=>"<li>"+w+"</li>").join("")}
-          </ul>
-        </div>
-      </div>
-
-    `).join("");
-  }
-
-  resultSection.classList.remove("hidden");
-  resultSection.scrollIntoView({behavior:"smooth"});
-}
-
-/* -----------------------
-   EVENTS
------------------------- */
-
-s1Next.addEventListener("click",()=>setStep(2));
-s2Back.addEventListener("click",()=>setStep(1));
-s2Next.addEventListener("click",()=>setStep(3));
-s3Back.addEventListener("click",()=>setStep(2));
-calcBtn.addEventListener("click",renderResult);
-
-yearsFamily.addEventListener("input",()=>{
-  const v = Number(yearsFamily.value);
-  yearsFamilyLabel.textContent = v>=15 ? "15+" : v;
-});
-
-restartBtn.addEventListener("click",()=>{
-  selectedFamily="";
-  freeText.value="";
-  yearsFamily.value=0;
-  formalEdu.value="";
-  resultSection.classList.add("hidden");
-  renderFamilies();
-  setStep(1);
-});
+<script src="app.js"></script>
+</body>
+</html>
