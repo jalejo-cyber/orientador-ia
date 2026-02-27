@@ -1,5 +1,9 @@
 const $ = (id) => document.getElementById(id);
 
+/* -----------------------
+   ELEMENTS
+------------------------ */
+
 const progressFill = $("progressFill");
 const progressText = $("progressText");
 
@@ -8,40 +12,41 @@ const step2 = $("step2");
 const step3 = $("step3");
 
 const familyGrid = $("familyGrid");
-const tasksBox = $("tasksBox");
 
 const yearsFamily = $("yearsFamily");
 const yearsFamilyLabel = $("yearsFamilyLabel");
-const status = $("status");
 const freeText = $("freeText");
-
 const formalEdu = $("formalEdu");
-const courseHours = $("courseHours");
 
 const resultSection = $("resultSection");
-const resultSummary = $("resultSummary");
 const resultList = $("resultList");
-const downloadPdfBtn = $("downloadPdfBtn");
-const restartBtn = $("restartBtn");
 
 const s1Next = $("s1Next");
 const s2Back = $("s2Back");
 const s2Next = $("s2Next");
 const s3Back = $("s3Back");
 const calcBtn = $("calcBtn");
+const restartBtn = $("restartBtn");
+
+/* -----------------------
+   GLOBAL STATE
+------------------------ */
 
 let DATA = [];
 let selectedFamily = "";
-let lastResults = [];
 
 /* -----------------------
-   LOAD REAL DATA
+   LOAD DATA
 ------------------------ */
 
 async function loadData(){
-  const res = await fetch("/data_cp.json");
-  DATA = await res.json();
-  renderFamilies();
+  try {
+    const res = await fetch("/data_cp.json");
+    DATA = await res.json();
+    renderFamilies();
+  } catch (err) {
+    console.error("Error carregant JSON:", err);
+  }
 }
 
 loadData();
@@ -76,17 +81,17 @@ function setStep(n){
 }
 
 /* -----------------------
-   FAMILIES (dynamic)
+   FAMILIES
 ------------------------ */
 
 function renderFamilies(){
-  const families = [...new Set(DATA.map(d=>d.familia).filter(Boolean))];
+  const families = [...new Set(DATA.map(d=>d.familia).filter(Boolean))].sort();
 
   familyGrid.innerHTML = families.map(f=>`
     <div class="family-card ${selectedFamily===f?'selected':''}" data-id="${f}">
       <div>
         <div class="family-title">${f}</div>
-        <div class="family-desc">Certificats professionals SOC</div>
+        <div class="family-desc">Certificats professionals</div>
       </div>
     </div>
   `).join("");
@@ -100,74 +105,43 @@ function renderFamilies(){
 }
 
 /* -----------------------
-   LEVEL PREFERENCE
+   CORE ENGINE
+   (Detecta UC coincidents)
 ------------------------ */
 
-function eduPreferredLevel(){
-  const edu = formalEdu.value;
-  if(edu==="cap") return 1;
-  if(edu==="eso") return 2;
-  if(edu==="fp1") return 2;
-  if(edu==="fp2") return 3;
-  return 1;
-}
-
-/* -----------------------
-   HYBRID ENGINE
------------------------- */
-
-function scoreQualificationsHybrid(){
+function findMatchingCompetencies(){
 
   const text = normalizeText(freeText.value);
-  const y = Number(yearsFamily.value || 0);
-  const prefLevel = eduPreferredLevel();
+  if(!text) return [];
 
-  const results = DATA.map(cp=>{
+  const matches = [];
 
-    let score = 0;
-    const why = [];
+  DATA.forEach(cp => {
 
-    // Family match
-    if(selectedFamily && cp.familia===selectedFamily){
-      score += 30;
-      why.push("Família professional coherent");
-    }
+    // si hi ha família seleccionada, filtrar
+    if(selectedFamily && cp.familia !== selectedFamily) return;
 
-    // Keyword matching in UC
-    let matches = 0;
+    (cp.competencies || []).forEach(uc => {
 
-    cp.competencies.forEach(uc=>{
       const desc = normalizeText(uc.descripcio);
-      if(text && desc.includes(text)){
-        matches++;
+
+      if(desc.includes(text)){
+        matches.push({
+          cpCodi: cp.codi,
+          cpNom: cp.nom,
+          nivell: cp.nivell,
+          familia: cp.familia,
+          ucCodi: uc.codi,
+          ucDesc: uc.descripcio,
+          durada: uc.durada
+        });
       }
+
     });
-
-    if(matches){
-      score += matches * 10;
-      why.push("Coincidència amb unitats de competència: "+matches);
-    }
-
-    // Experience
-    if(y>=2){
-      score += 15;
-      why.push("Experiència rellevant");
-    }
-
-    // Level coherence
-    if(cp.nivell===prefLevel){
-      score += 10;
-      why.push("Nivell coherent amb formació");
-    }
-
-    return {...cp, score, why};
 
   });
 
-  return results
-    .filter(r=>r.score>20)
-    .sort((a,b)=>b.score-a.score)
-    .slice(0,6);
+  return matches;
 }
 
 /* -----------------------
@@ -176,37 +150,62 @@ function scoreQualificationsHybrid(){
 
 function renderResult(){
 
-  const results = scoreQualificationsHybrid();
-  lastResults = results;
+  const results = findMatchingCompetencies();
 
   if(!results.length){
     resultList.innerHTML = `
       <div class="result-card">
-        <strong>No s’han detectat coincidències clares.</strong>
-        <div class="why">Prova a afegir més descripció de tasques.</div>
+        <strong>No s’han detectat Unitats de Competència coincidents.</strong>
+        <div class="why">
+          Prova a descriure tasques més concretes (ex: facturació, atenció al client, manteniment, instal·lació, dependència, etc.).
+        </div>
       </div>
     `;
-  }else{
+  } else {
 
-    resultList.innerHTML = results.map(r=>`
+    // Agrupar per certificat
+    const grouped = {};
 
+    results.forEach(r=>{
+      if(!grouped[r.cpCodi]){
+        grouped[r.cpCodi] = {
+          nom: r.cpNom,
+          nivell: r.nivell,
+          familia: r.familia,
+          ucs: []
+        };
+      }
+
+      grouped[r.cpCodi].ucs.push({
+        codi: r.ucCodi,
+        desc: r.ucDesc,
+        durada: r.durada
+      });
+    });
+
+    resultList.innerHTML = Object.entries(grouped).map(([codi, cp]) => `
       <div class="result-card">
-        <div class="result-top">
-          <div>
-            <div><strong>${r.codi}</strong> · Nivell ${r.nivell}</div>
-            <div style="margin-top:4px">${r.nom}</div>
-          </div>
-          <div class="tag">${r.score} punts</div>
+
+        <div style="margin-bottom:10px">
+          <strong>${codi}</strong> · Nivell ${cp.nivell ?? "-"}
+          <div style="margin-top:4px">${cp.nom}</div>
+          <div style="font-size:13px; color:#6b7280">${cp.familia}</div>
         </div>
 
-        <div class="why">
-          <strong>Indicadors:</strong>
+        <div>
+          <strong>Unitats de Competència detectades:</strong>
           <ul>
-            ${r.why.map(w=>"<li>"+w+"</li>").join("")}
+            ${cp.ucs.map(uc=>`
+              <li style="margin-bottom:8px">
+                <strong>${uc.codi}</strong><br>
+                ${uc.desc}
+                ${uc.durada ? `<div style="font-size:12px;color:#6b7280">Durada: ${uc.durada}h</div>` : ""}
+              </li>
+            `).join("")}
           </ul>
         </div>
-      </div>
 
+      </div>
     `).join("");
   }
 
