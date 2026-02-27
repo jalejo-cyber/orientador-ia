@@ -3,95 +3,175 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orientador Certificats Professionals</title>
+  <title>Sistema digital d’orientació · Foment Formació</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
+  <div class="page">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-mark">FF</div>
+        <div class="brand-text">
+          <div class="brand-title">Foment Formació</div>
+          <div class="brand-sub">Sistema digital d’orientació · Catalunya (orientatiu)</div>
+        </div>
+      </div>
+      <div class="pill">Orientatiu · No vinculant</div>
+    </header>
 
-<div class="container">
-  <h1>Orientador de Certificats Professionals</h1>
-  <p class="subtitle">Sistema d’orientació basat en unitats de competència (SOC)</p>
+    <main class="card">
+      <div class="hero">
+        <h1>Prediagnòstic orientatiu d’acreditació de competències</h1>
+        <p>
+          Aquesta eina proposa certificats professionals segons <strong>unitats de competència (UC)</strong>
+          detectades a partir del que escrius i del teu CV (opcional). El resultat és <strong>orientatiu</strong>.
+        </p>
+      </div>
 
-  <div class="progress">
-    <div id="progressFill"></div>
+      <div class="progress">
+        <div class="progress-top">
+          <div class="progress-title">Progrés</div>
+          <div id="progressText" class="progress-text">Pas 1 de 3</div>
+        </div>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <section id="step1" class="step step-active">
+        <div class="step-head">
+          <div class="step-num">1</div>
+          <div>
+            <h2>Família professional</h2>
+            <p class="muted">Tria la família principal per filtrar els certificats.</p>
+          </div>
+        </div>
+
+        <div id="familyGrid" class="family-grid"></div>
+
+        <div class="actions">
+          <button id="s1Next" class="btn btn-primary">Següent</button>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section id="step2" class="step">
+        <div class="step-head">
+          <div class="step-num">2</div>
+          <div>
+            <h2>Experiència i CV (opcional)</h2>
+            <p class="muted">Descriu funcions i/o puja un CV per detectar paraules clau.</p>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label>Anys d’experiència aproximats</label>
+            <div class="range">
+              <input type="range" id="yearsFamily" min="0" max="15" value="0">
+              <div class="range-meta">
+                <span>0</span>
+                <span id="yearsFamilyLabel" class="range-value">0</span>
+                <span>15+</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Pujar CV (TXT o PDF) (opcional)</label>
+            <input type="file" id="cvUpload" accept=".pdf,.txt">
+            <div id="cvStatus" class="hint">Encara no s’ha pujat cap CV.</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Funcions / tasques realitzades (recomanat)</label>
+          <textarea id="freeText" rows="4" placeholder="Ex: TPV, reposició, atenció al client / cures i mobilitzacions / factures i arxiu..."></textarea>
+          <div class="hint">Consell: escriu paraules clau del teu dia a dia. Ajuda a detectar UC.</div>
+        </div>
+
+        <div class="actions">
+          <button id="s2Back" class="btn">Enrere</button>
+          <button id="s2Next" class="btn btn-primary">Següent</button>
+        </div>
+      </section>
+
+      <!-- STEP 3 -->
+      <section id="step3" class="step">
+        <div class="step-head">
+          <div class="step-num">3</div>
+          <div>
+            <h2>Formació</h2>
+            <p class="muted">Serveix per orientar els requisits d’accés del nivell.</p>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label>Nivell formatiu (reglat)</label>
+            <select id="formalEdu">
+              <option value="">Selecciona...</option>
+              <option value="cap">Sense titulació</option>
+              <option value="eso">ESO</option>
+              <option value="fp1">CFGM (nivell 2 aprox.)</option>
+              <option value="fp2">CFGS / Universitat (nivell 3 aprox.)</option>
+              <option value="batx">Batxillerat</option>
+              <option value="grau">Grau universitari</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Hores de cursos no reglats (aprox.)</label>
+            <input type="number" id="nonFormalHours" min="0" step="10" placeholder="Ex: 120">
+            <div class="hint">Ajuda lleugerament a l’orientació (no és requisit formal).</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="s3Back" class="btn">Enrere</button>
+          <button id="calcBtn" class="btn btn-primary">Calcular orientació</button>
+        </div>
+      </section>
+
+      <!-- RESULT -->
+      <section id="resultSection" class="result hidden">
+        <div class="result-head">
+          <div>
+            <h2>Resultats</h2>
+            <p class="muted">Es mostren només resultats amb cobertura ≥ 60%. Primer els viables.</p>
+          </div>
+          <div class="result-actions">
+            <button id="generateReportBtn" class="btn btn-primary">Descarregar informe PDF</button>
+            <button id="restartBtn" class="btn">Reiniciar</button>
+          </div>
+        </div>
+
+        <div id="resultList" class="results"></div>
+
+        <div class="legal">
+          <strong>Avís:</strong> Aquesta eina és orientativa i no substitueix l’assessorament ni la validació oficial.
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <span>© Foment Formació</span>
+      <span class="muted">MVP orientador (client-side)</span>
+    </footer>
   </div>
-  <div class="progress-text" id="progressText">Pas 1 de 3</div>
 
-  <!-- PAS 1 -->
-  <section id="step1" class="step step-active">
-    <h2>1. Família professional</h2>
-    <div id="familyGrid" class="family-grid"></div>
-    <div class="buttons">
-      <button id="s1Next" class="btn primary">Següent</button>
-    </div>
-  </section>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- PAS 2 -->
-  <section id="step2" class="step">
-    <h2>2. Experiència professional</h2>
+  <!-- PDF.js (per llegir CV PDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-    <label>Anys d'experiència</label>
-    <input type="range" id="yearsFamily" min="0" max="15" value="0">
-    <div><strong><span id="yearsFamilyLabel">0</span></strong> anys</div>
-
-    <label>Descriu tasques o funcions realitzades</label>
-    <textarea id="freeText" rows="5"></textarea>
-
-    <label>Pujar CV (PDF o TXT)</label>
-    <input type="file" id="cvUpload" accept=".pdf,.txt">
-
-    <div class="buttons">
-      <button id="s2Back" class="btn">Enrere</button>
-      <button id="s2Next" class="btn primary">Següent</button>
-    </div>
-  </section>
-
-  <!-- PAS 3 -->
-  <section id="step3" class="step">
-    <h2>3. Formació</h2>
-
-    <label>Nivell formatiu</label>
-    <select id="formalEdu">
-      <option value="">Selecciona...</option>
-      <option value="cap">Sense titulació</option>
-      <option value="eso">ESO</option>
-      <option value="fp1">CFGM</option>
-      <option value="fp2">CFGS</option>
-      <option value="batx">Batxillerat</option>
-      <option value="grau">Universitat</option>
-    </select>
-
-    <label>Cursos no reglats (hores totals)</label>
-    <input type="number" id="nonFormalHours" placeholder="Exemple: 120">
-
-    <div class="buttons">
-      <button id="s3Back" class="btn">Enrere</button>
-      <button id="calcBtn" class="btn primary">Calcular orientació</button>
-    </div>
-  </section>
-
-  <!-- RESULTATS -->
-  <section id="resultSection" class="hidden">
-    <h2>Resultats d’orientació</h2>
-    <div id="resultList"></div>
-
-    <div style="margin-top:20px;">
-      <button id="restartBtn" class="btn">Reiniciar</button>
-      <button id="generateReportBtn" class="btn primary">
-        Generar informe tècnic PDF
-      </button>
-    </div>
-  </section>
-
-</div>
-
-<!-- Llibreries externes -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<!-- App -->
-<script src="app.js"></script>
-
+  <script src="app.js"></script>
 </body>
 </html>
