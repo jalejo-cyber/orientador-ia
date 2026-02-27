@@ -114,18 +114,30 @@ function findMatchingCompetencies(){
   const text = normalizeText(freeText.value);
   if(!text) return [];
 
+  const words = text.split(" ").filter(w => w.length > 3); 
+  // ignorem paraules molt curtes
+
   const matches = [];
 
   DATA.forEach(cp => {
 
-    // si hi ha família seleccionada, filtrar
     if(selectedFamily && cp.familia !== selectedFamily) return;
 
     (cp.competencies || []).forEach(uc => {
 
       const desc = normalizeText(uc.descripcio);
 
-      if(desc.includes(text)){
+      let coincidenceCount = 0;
+
+      words.forEach(word => {
+        if(desc.includes(word)){
+          coincidenceCount++;
+        }
+      });
+
+      // si coincideixen almenys 1 o 2 paraules → és rellevant
+      if(coincidenceCount >= 1){
+
         matches.push({
           cpCodi: cp.codi,
           cpNom: cp.nom,
@@ -133,15 +145,18 @@ function findMatchingCompetencies(){
           familia: cp.familia,
           ucCodi: uc.codi,
           ucDesc: uc.descripcio,
-          durada: uc.durada
+          durada: uc.durada,
+          relevance: coincidenceCount
         });
+
       }
 
     });
 
   });
 
-  return matches;
+  // ordenem per més coincidències
+  return matches.sort((a,b)=> b.relevance - a.relevance);
 }
 
 /* -----------------------
