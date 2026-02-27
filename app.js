@@ -109,54 +109,62 @@ function renderFamilies(){
    (Detecta UC coincidents)
 ------------------------ */
 
-function findMatchingCompetencies(){
+function analyzeCertificates(){
 
   const text = normalizeText(freeText.value);
   if(!text) return [];
 
-  const words = text.split(" ").filter(w => w.length > 3); 
-  // ignorem paraules molt curtes
+  const words = text.split(" ").filter(w => w.length > 3);
+  const userEdu = formalEdu.value;
 
-  const matches = [];
+  const results = [];
 
   DATA.forEach(cp => {
 
     if(selectedFamily && cp.familia !== selectedFamily) return;
 
-    (cp.competencies || []).forEach(uc => {
+    const totalUC = (cp.competencies || []).length;
+    if(totalUC === 0) return;
+
+    let matchedUC = [];
+    let unmatchedUC = [];
+
+    cp.competencies.forEach(uc => {
 
       const desc = normalizeText(uc.descripcio);
+      let matches = 0;
 
-      let coincidenceCount = 0;
-
-      words.forEach(word => {
-        if(desc.includes(word)){
-          coincidenceCount++;
-        }
+      words.forEach(word=>{
+        if(desc.includes(word)) matches++;
       });
 
-      // si coincideixen almenys 1 o 2 paraules → és rellevant
-      if(coincidenceCount >= 1){
-
-        matches.push({
-          cpCodi: cp.codi,
-          cpNom: cp.nom,
-          nivell: cp.nivell,
-          familia: cp.familia,
-          ucCodi: uc.codi,
-          ucDesc: uc.descripcio,
-          durada: uc.durada,
-          relevance: coincidenceCount
-        });
-
+      if(matches > 0){
+        matchedUC.push(uc);
+      } else {
+        unmatchedUC.push(uc);
       }
 
     });
 
+    if(matchedUC.length > 0){
+
+      const coverage = Math.round((matchedUC.length / totalUC) * 100);
+      const accessOk = meetsAccessRequirement(cp.nivell, userEdu);
+
+      results.push({
+        ...cp,
+        totalUC,
+        matchedUC,
+        unmatchedUC,
+        coverage,
+        accessOk
+      });
+
+    }
+
   });
 
-  // ordenem per més coincidències
-  return matches.sort((a,b)=> b.relevance - a.relevance);
+  return results.sort((a,b)=> b.coverage - a.coverage);
 }
 
 /* -----------------------
